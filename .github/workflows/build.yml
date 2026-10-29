@@ -7,6 +7,8 @@ on:
 jobs:
   windows:
     runs-on: windows-2022
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -35,6 +37,20 @@ jobs:
         with:
           name: Kickstart-Windows
           path: out
+
+      - name: Publier sur la branche builds
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path out/* -DestinationPath "$env:RUNNER_TEMP/Kickstart-Windows.zip" -Force
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout --orphan builds-tmp
+          git rm -rf --cached . | Out-Null
+          Copy-Item "$env:RUNNER_TEMP/Kickstart-Windows.zip" .
+          git add -f Kickstart-Windows.zip
+          git commit -m "Build Windows ${{ github.sha }}"
+          git push -f origin HEAD:refs/heads/builds
 
   macos:
     runs-on: macos-14
