@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SDK WebView2 (NuGet)
+        shell: pwsh
+        run: nuget install Microsoft.Web.WebView2 -Version 1.0.1901.177 -OutputDirectory "$env:RUNNER_TEMP/nuget"
+
+      - name: Configuration
+        shell: pwsh
+        run: |
+          $loc = "$env:RUNNER_TEMP/nuget" -replace '\\','/'
+          cmake -B build -G "Visual Studio 17 2022" -A x64 "-DJUCE_WEBVIEW2_PACKAGE_LOCATION=$loc"
+
+      - name: Compilation
+        run: cmake --build build --config Release --target Kickstart_VST3 Kickstart_Standalone --parallel
+
+      - name: Paquet
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          Copy-Item -Recurse build/Kickstart_artefacts/Release/VST3/Kickstart.vst3 out/
+          Copy-Item build/Kickstart_artefacts/Release/Standalone/Kickstart.exe out/
+          Copy-Item README.md out/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kickstart-Windows
+          path: out
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configuration
+        run: cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+      - name: Compilation
+        run: cmake --build build --config Release --target Kickstart_VST3 Kickstart_AU -- -quiet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kickstart-macOS
+          path: |
+            build/Kickstart_artefacts/Release/VST3/Kickstart.vst3
+            build/Kickstart_artefacts/Release/AU/Kickstart.component
