@@ -66,3 +66,33 @@ jobs:
           path: |
             build/Kickstart_artefacts/Release/VST3/Kickstart.vst3
             build/Kickstart_artefacts/Release/AU/Kickstart.component
+
+  release:
+    # Publie les fichiers prêts à installer sur la page « Releases » du dépôt (version « latest »)
+    if: github.ref == 'refs/heads/main'
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dl
+
+      - name: Archives
+        run: |
+          cd dl/Kickstart-Windows && zip -qr ../../Kickstart-Windows.zip . && cd ../..
+          cd dl/Kickstart-macOS && zip -qr ../../Kickstart-macOS.zip . && cd ../..
+          ls -la *.zip
+
+      - name: Release « latest »
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest Kickstart-Windows.zip Kickstart-macOS.zip \
+            --target "${{ github.sha }}" \
+            --title "Kickstart (dernière version)" \
+            --notes "Compilé automatiquement depuis le commit ${{ github.sha }}. Télécharge **Kickstart-Windows.zip** (ou **Kickstart-macOS.zip**), puis suis la section Installer du README." \
+            --latest
