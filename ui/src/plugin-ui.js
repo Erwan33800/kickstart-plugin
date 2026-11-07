@@ -15,15 +15,20 @@ const MODE_NAME={classic:'Classique',surprise:'Surprenant',drop:'Drop'};
 const NOTE_N=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const noteName=p=>NOTE_N[p%12]+(Math.floor(p/12)-2);
 /* Notes MIDI par défaut : convention General MIDI, celle des Drum Racks d'Ableton (C1 = 36) */
-const DEFAULT_MAP={k:36,rim:37,sn:38,cp:39,ch:42,oh:46,ride:51,cb:56,tamb:54,shk:70,pl:64,pm:63,ph:62,tom:45};
-const TOM_OFF=[5,3,2,0]; // les toms descendent : 50, 48, 47, 45
+/* Notes par défaut : les 16 pads d'un Drum Rack (C1 à D#2), rangés comme les kits d'Ableton :
+   C1 kick · C#1 rim · D1 snare · D#1 clap · F#1 hat fermé · A#1 hat ouvert · G#1/A1/B1 toms · D#2 ride.
+   Les pads restants (E1, F1, G1, C2, C#2, D2) accueillent congas, cowbell, tambourin et shaker. */
+const DEFAULT_MAP={k:36,rim:37,sn:38,cp:39,pl:40,pm:41,ch:42,ph:43,tom:44,oh:46,cb:48,tamb:49,shk:50,ride:51};
+const PAD_LO=36,PAD_HI=51;
+const TOM_OFF=[3,3,1,0]; // fills descendants : tom aigu (B1), médium (A1), grave (G#1)
+const MAP_V=2;
 const ICON={
   lock:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>',
   mute:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6h2.5l3.5-3v10l-3.5-3H2.5z"/><path d="M11 6l4 4M15 6l-4 4"/></svg>',
   rm:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>'};
 const store={get(k,d){try{const v=localStorage.getItem('kickstart.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},
   set(k,v){try{localStorage.setItem('kickstart.'+k,JSON.stringify(v))}catch(_){}}};
-S.map={...DEFAULT_MAP,...store.get('map',{})};
+S.map={...DEFAULT_MAP,...store.get('map2',{})};
 S.swingClip=store.get('swingClip',true);
 S.listen=true;
 
@@ -135,16 +140,31 @@ function renderKitOv(){
     TRACKS.filter(t=>t.g===gi).forEach(t=>{const b=document.createElement('button');b.className='chip';b.textContent=t.name;b.setAttribute('aria-pressed',S.kit.has(t.id));
       b.onclick=()=>{const on=!S.kit.has(t.id);on?S.kit.add(t.id):(S.kit.delete(t.id),S.locks.delete(t.id));rebuildKit();renderKitOv();if(on)audition(t.id,.8)};ch.appendChild(b)});
     kg.appendChild(ch)})}
+/* Réglage des notes : grille 4x4 comme le Drum Rack (C1 en bas à gauche) + liste des éléments */
+let selEl=null;
+function setNote(id,p){S.map[id]=Math.min(127,Math.max(0,p));store.set('map2',S.map);pushPattern();render();renderSetOv();audition(id,.8)}
 function renderSetOv(){
   $('swClip').setAttribute('aria-checked',S.swingClip);
+  const pads=$('pads');pads.innerHTML='';
+  for(let row=3;row>=0;row--)for(let col=0;col<4;col++){
+    const n=PAD_LO+row*4+col,els=TRACKS.filter(t=>S.map[t.id]===n||(t.id==='tom'&&TOM_OFF.some(o=>S.map.tom+o===n)));
+    const b=document.createElement('button');b.className='pad';b.dataset.n=n;
+    if(els.length)b.classList.add('used');if(selEl&&els.some(t=>t.id===selEl))b.classList.add('sel');
+    b.innerHTML=`<small>${noteName(n)}</small><span>${els.map(t=>t.short||t.name).join(' · ')||'—'}</span>`;
+    b.title=selEl?`Mettre ${NAME[selEl]} sur ${noteName(n)}`:`${noteName(n)}${els.length?' : '+els.map(t=>t.name).join(', '):' (libre)'}`;
+    b.onclick=()=>{if(selEl)setNote(selEl,n);else if(els[0]){selEl=els[0].id;renderSetOv();audition(els[0].id,.8)}};
+    pads.appendChild(b)}
   const mg=$('mgrid');mg.innerHTML='';
-  TRACKS.forEach(t=>{const r=document.createElement('div');r.className='mrow';
-    r.innerHTML=`<span>${t.name}${t.id==='tom'?' (grave)':''}</span><button class="step" aria-label="Note plus grave">−</button><output>${noteName(S.map[t.id])}</output><button class="step" aria-label="Note plus aiguë">+</button>`;
-    const [m,p]=r.querySelectorAll('.step'),o=r.querySelector('output');
-    const ch=d=>{S.map[t.id]=Math.min(127,Math.max(0,S.map[t.id]+d));o.textContent=noteName(S.map[t.id]);store.set('map',S.map);pushPattern();audition(t.id,.8);render()};
-    m.onclick=()=>ch(-1);p.onclick=()=>ch(1);o.title=`Note MIDI ${S.map[t.id]}`;mg.appendChild(r)})}
+  TRACKS.forEach(t=>{const out=S.map[t.id]<PAD_LO||S.map[t.id]>PAD_HI;
+    const r=document.createElement('div');r.className='mrow'+(selEl===t.id?' sel':'')+(out?' out':'');
+    r.innerHTML=`<button class="mname" title="Choisir, puis clique un pad">${t.name}</button><button class="step" aria-label="Note plus grave">−</button><output>${noteName(S.map[t.id])}</output><button class="step" aria-label="Note plus aiguë">+</button>`;
+    const [nm,m,p]=r.querySelectorAll('button'),o=r.querySelector('output');
+    nm.onclick=()=>{selEl=selEl===t.id?null:t.id;renderSetOv();if(selEl)audition(t.id,.8)};
+    m.onclick=()=>setNote(t.id,S.map[t.id]-1);p.onclick=()=>setNote(t.id,S.map[t.id]+1);
+    o.title=out?`Note MIDI ${S.map[t.id]} : hors des 16 pads, muette sur un Drum Rack standard`:`Note MIDI ${S.map[t.id]}`;mg.appendChild(r)});
+  $('padHint').textContent=selEl?`${NAME[selEl]} : clique le pad où il doit jouer.`:'Clique un élément, puis le pad de ton Drum Rack où il doit jouer.'}
 $('swClip').onclick=()=>{S.swingClip=!S.swingClip;store.set('swingClip',S.swingClip);$('swClip').setAttribute('aria-checked',S.swingClip);pushPattern()};
-$('mapReset').onclick=()=>{S.map={...DEFAULT_MAP};store.set('map',S.map);renderSetOv();render();pushPattern()};
+$('mapReset').onclick=()=>{S.map={...DEFAULT_MAP};selEl=null;store.set('map2',S.map);renderSetOv();render();pushPattern()};
 
 /* ---------- séquenceur ---------- */
 let cols=[],fresh=false;
@@ -246,11 +266,11 @@ function renderDots(){const el=$('hdots');el.innerHTML='';
 /* ---------- état sauvegardé avec le set Live (par instance du plugin) ---------- */
 const ser=e=>({...e,snap:{...e.snap,kit:[...e.snap.kit]}});
 const des=e=>({...e,snap:{...e.snap,kit:new Set(e.snap.kit)}});
-function exportState(){const e=entryOf();e.id=S.curId;return JSON.stringify({v:1,cur:ser(e),recent:recent.map(ser),map:S.map,swingClip:S.swingClip,dens:S.dens,listen:S.listen})}
+function exportState(){const e=entryOf();e.id=S.curId;return JSON.stringify({v:1,cur:ser(e),recent:recent.map(ser),map:S.map,mapV:MAP_V,swingClip:S.swingClip,dens:S.dens,listen:S.listen})}
 let stT;function pushState(){if(!JUCE)return;clearTimeout(stT);stT=setTimeout(()=>toMax('state',exportState()),250)}
 bindIn('restore',json=>{let o;try{o=JSON.parse(json)}catch(_){return}if(!o||!o.cur)return;
   recent=(o.recent||[]).slice(0,5).map(des);recentN=Math.max(0,...recent.map(e=>e.id||0));
-  if(o.map)S.map={...DEFAULT_MAP,...o.map};S.swingClip=o.swingClip!==false;
+  if(o.map&&o.mapV===MAP_V)S.map={...DEFAULT_MAP,...o.map};S.swingClip=o.swingClip!==false;
   if(o.dens!=null){S.dens=o.dens;showDens()}
   if(o.listen===false){S.listen=false;$('listen').setAttribute('aria-pressed','false');toMax('live',0)}
   const e=des(o.cur),h=e.snap;

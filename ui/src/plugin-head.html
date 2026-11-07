@@ -147,10 +147,22 @@ button{font:inherit;color:inherit;margin:0}
 .pre{border:1px dashed var(--line);background:none;border-radius:999px;padding:2px 9px;cursor:pointer;color:var(--dim);font-size:11.5px}
 .pre:hover{color:var(--fg);border-color:var(--dim)}
 .pre[aria-pressed="true"]{border-style:solid;border-color:var(--faint);color:var(--fg)}
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:4px 12px}
-.mrow{display:flex;align-items:center;gap:4px;font-size:11.5px}
-.mrow span:first-child{flex:1;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.step{width:18px;height:18px;border:1px solid var(--line);border-radius:4px;background:none;cursor:pointer;color:var(--dim);padding:0;line-height:1}
+.setmap{display:grid;grid-template-columns:260px minmax(0,1fr);gap:14px;align-items:start}
+.padwrap{display:grid;gap:3px}
+.pads{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.pad{height:20px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--faint);cursor:pointer;padding:0 4px;display:flex;align-items:center;gap:4px;min-width:0;font-size:10px;text-align:left}
+.pad small{font:9px var(--mono);color:var(--faint);flex:none}
+.pad span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pad.used{background:var(--raised);color:var(--fg)}
+.pad.sel{border-color:var(--hit);box-shadow:inset 0 0 0 1px var(--hit)}
+.pad:hover{border-color:var(--dim)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 12px}
+.mname{flex:1;min-width:0;border:0;background:none;padding:0;color:var(--dim);cursor:pointer;text-align:left;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mname:hover,.mrow.sel .mname{color:var(--fg)}
+.mrow.sel output{color:var(--hit)}
+.mrow.out output{color:var(--drop)}
+.mrow{display:flex;align-items:center;gap:4px;font-size:11.5px;height:19px}
+.step{width:17px;height:17px;border:1px solid var(--line);border-radius:4px;background:none;cursor:pointer;color:var(--dim);padding:0;line-height:1}
 .step:hover{color:var(--fg);border-color:var(--faint)}
 .mrow output{font:11px var(--mono);width:34px;text-align:center}
 .setrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
@@ -215,14 +227,15 @@ button{font:inherit;color:inherit;margin:0}
       <div class="ovb"><div class="kgrid" id="kgrid"></div></div>
     </div>
     <div class="ov" id="ovSet" hidden>
-      <div class="ovh"><span class="lab">Réglages</span><button class="ib x" data-close aria-label="Fermer">✕</button></div>
+      <div class="ovh"><span class="lab">Notes</span>
+        <button class="tog" id="swClip" role="switch" aria-checked="true" title="Coupé : grille droite, à swinguer avec un Groove de Live"><i></i>Swing écrit dans le clip</button>
+        <button class="link" id="mapReset" style="margin-left:auto">Notes par défaut (C1–D#2)</button>
+        <button class="ib x" data-close aria-label="Fermer">✕</button></div>
       <div class="ovb">
-        <div class="setrow">
-          <button class="tog" id="swClip" role="switch" aria-checked="true"><i></i>Écrire le swing dans le clip</button>
-          <span class="note">Coupé : grille droite, à swinguer avec un Groove de Live.</span>
-          <button class="link" id="mapReset" style="margin-left:auto">Notes par défaut</button>
+        <div class="setmap">
+          <div class="padwrap"><div class="pads" id="pads" aria-label="Pads du Drum Rack, C1 en bas à gauche"></div><span class="note" id="padHint"></span></div>
+          <div class="mgrid" id="mgrid"></div>
         </div>
-        <div class="mgrid" id="mgrid"></div>
       </div>
     </div>
   </section>

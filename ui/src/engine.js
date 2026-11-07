@@ -2,9 +2,9 @@
 /* Pistes affichables, dans l'ordre du séquenceur */
 const TRACKS=[
   {id:'k',name:'Kick',g:0},{id:'sn',name:'Snare',g:0},{id:'cp',name:'Clap',g:0},{id:'rim',name:'Rim',g:0},
-  {id:'ch',name:'Hat fermé',g:1},{id:'oh',name:'Hat ouvert',g:1},{id:'ride',name:'Ride',g:1},{id:'cb',name:'Cowbell',g:1},
-  {id:'shk',name:'Shaker',g:2},{id:'tamb',name:'Tambourin',g:2},
-  {id:'pl',name:'Conga grave',g:3},{id:'pm',name:'Conga médium',g:3},{id:'ph',name:'Conga aiguë',g:3},{id:'tom',name:'Toms',g:3}];
+  {id:'ch',name:'Hat fermé',short:'HH f.',g:1},{id:'oh',name:'Hat ouvert',short:'HH o.',g:1},{id:'ride',name:'Ride',g:1},{id:'cb',name:'Cowbell',short:'Cowb.',g:1},
+  {id:'shk',name:'Shaker',g:2},{id:'tamb',name:'Tambourin',short:'Tamb.',g:2},
+  {id:'pl',name:'Conga grave',short:'Cga gr.',g:3},{id:'pm',name:'Conga médium',short:'Cga méd.',g:3},{id:'ph',name:'Conga aiguë',short:'Cga aig.',g:3},{id:'tom',name:'Toms',g:3}];
 const GROUPS=['Fondations','Métaux','Secoués','Peaux'];
 const IDS=TRACKS.map(t=>t.id);
 const NAME=Object.fromEntries(TRACKS.map(t=>[t.id,t.name]));

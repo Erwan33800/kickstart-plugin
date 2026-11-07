@@ -116,7 +116,17 @@ Une fois le pattern figé dans un clip, remets le **Monitor** de la piste drums 
 
 ### Notes MIDI
 
-Par défaut, Kickstart suit la convention des Drum Racks d'Ableton (Kick = C1, Snare = D1, Clap = D#1, Hat fermé = F#1, Hat ouvert = A#1…). Si ton kit est rangé autrement, change les notes dans le menu **⋯** en haut à droite du séquenceur.
+Par défaut, tout tombe sur les **16 pads d'un Drum Rack (C1 à D#2)**, rangés comme les kits d'Ableton :
+
+```
+D#2 Ride        C2  Cowbell     C#2 Tambourin   D2  Shaker
+G#1 Tom grave   A1  Tom médium  A#1 Hat ouvert  B1  Tom aigu
+E1  Conga grave F1  Conga méd.  F#1 Hat fermé   G1  Conga aiguë
+C1  Kick        C#1 Rim         D1  Snare       D#1 Clap
+```
+(rangée du bas = C1 à D#1, comme dans Live)
+
+Les pads E1, F1, G1, C2, C#2 et D2 jouent ce que ton kit y a mis : dans un 909 Core Kit, les congas sonneront par exemple comme un second kick ou une snare. Pour changer, ouvre le menu **⋯** en haut à droite du séquenceur : clique un élément, puis le pad de ton Drum Rack où il doit jouer (ou règle la note avec − / +). Une note en rouge est hors des 16 pads et reste muette sur un Drum Rack standard.
 
 ## 5. Ça ne marche pas ?
 
@@ -125,7 +135,7 @@ Par défaut, Kickstart suit la convention des Drum Racks d'Ableton (Kick = C1, S
 | Kickstart n'apparaît pas dans Live | Vérifie que le dossier est bien `C:\Program Files\Common Files\VST3\Kickstart.vst3`, que *Utiliser les dossiers système VST3* est activé, puis **Réanalyser**. |
 | Charger Kickstart remplace mon Drum Rack | Normal : un seul instrument par piste. Mets Kickstart sur **sa propre piste** (section 3). |
 | Pas de son | Sur la piste drums : **Monitor sur In** (pas Auto), **MIDI From** sur Kickstart, et la lecture de Live doit être lancée. |
-| Je n'entends qu'une partie du kit | Les notes de ton Drum Rack ne correspondent pas : ajuste-les dans le menu **⋯**. |
+| Je n'entends qu'une partie du kit, ou un élément joue le mauvais son | Ouvre le menu **⋯** et place chaque élément sur le bon pad (grille 4×4, C1 en bas à gauche). |
 | La fenêtre du plugin reste blanche | Installe ou mets à jour *Microsoft Edge WebView2 Runtime* (déjà présent sur la plupart des Windows 10/11). |
 | Le glisser-déposer ne crée pas de clip | Utilise l'export `.mid` (double-clic ou touche E), puis glisse le fichier depuis `Documents\Kickstart MIDI`. |
 
