@@ -4,9 +4,10 @@ Générateur de patterns de drums pour Ableton Live (et tout logiciel qui accept
 En un clic, tu obtiens un squelette de batterie qui s'écoute, puis tu le peaufines.
 
 - 9 styles : House, Techno, Afro house, Dub techno, Dub, UK garage, Breakbeat, Drum & bass, Dubstep
-- 3 types de pattern : **Classique**, **Surprenant**, **Drop**
+- 2 types de pattern : **Classique** et **Surprenant**
 - Boucles de 1 à 4 mesures (4 à 16 temps)
-- Kit à composer : kick, snare, clap, rim, hats, ride, cowbell, shaker, tambourin, congas, toms
+- 22 instruments à composer en kit : kick, snare, clap, snap, rim, rimshot, hats (fermé, pédale, ouvert), ride, crash, cowbell, shaker, tambourin, clave, woodblock, congas, toms (aigu, médium, grave)
+- Un **Rack** de 2 banques de 16 pads pour placer chaque instrument sur le pad de ton Drum Rack
 - « Tenter un drop » : garde ton pattern et le pousse en version drop
 - Historique des 5 derniers beats, sauvegarde avec le set Live
 
@@ -90,10 +91,13 @@ Chaque piste drums peut écouter son propre Kickstart. Tu peux aussi brancher pl
 
 ## 4. Utiliser Kickstart
 
-1. Choisis un **style**, un **type** (Classique, Surprenant, Drop) et une **longueur**.
-2. **Générer** (touche G) jusqu'à trouver un groove qui te plaît.
-3. Ajuste : clique ou glisse sur les cases, **Maj + clic** pour une note fantôme, **Kit** pour ajouter ou retirer des éléments.
-4. **Tenter un drop** (touche D) : même structure, version drop. Appuie encore pour une autre variante.
+La fenêtre a deux onglets : **Pattern** (le Rack, les réglages et le séquenceur) et **Style & kit**.
+
+1. Dans **Style & kit**, choisis un **style** (un clic génère un beat) et un **kit** : un kit prêt à l'emploi, ou les instruments un par un.
+2. Dans **Pattern**, règle le **type** (Classique ou Surprenant), la **longueur** (liste déroulante), le **swing** et la **densité** (glisse sur la valeur, molette, double-clic pour revenir à la valeur du style).
+3. **Générer** (touche G) jusqu'à trouver un groove qui te plaît.
+4. Ajuste : clique ou glisse sur les cases, **Maj + clic** pour une note fantôme, cadenas pour verrouiller une piste (elle survit à Générer), haut-parleur pour la couper.
+5. **Tenter un drop** (touche D) : même structure, version drop, avec un crash sur le premier temps. Appuie encore pour une autre variante, ou clique « revenir à l'original ».
 
 ### Poser le pattern dans un clip
 
@@ -109,24 +113,34 @@ Une fois le pattern figé dans un clip, remets le **Monitor** de la piste drums 
 | G | Générer |
 | D | Tenter un drop |
 | Z | Annuler |
-| 1 / 2 / 3 | Classique / Surprenant / Drop |
+| 1 / 2 | Classique / Surprenant |
 | ← / → | Style précédent / suivant |
 | E | Exporter en .mid |
 | Maj + clic | Note fantôme |
 
-### Notes MIDI
+### Le Rack et les notes MIDI
 
-Par défaut, tout tombe sur les **16 pads d'un Drum Rack (C1 à D#2)**, rangés comme les kits d'Ableton :
+Le **Rack**, en haut de l'onglet Pattern, représente les pads de ton Drum Rack : **2 banques de 16 pads** (boutons *C1 – D#2* et *E2 – G3*), en 2 rangées de 8, dans l'ordre des notes. Sur chaque pad, la note en haut et l'instrument en bas. Seuls les instruments du kit s'affichent : un pad dont l'instrument n'est pas dans le kit est « vide ».
+
+Par défaut, la **banque 1** reprend la disposition des kits d'Ableton et la **banque 2** accueille les derniers venus :
 
 ```
-D#2 Ride        C2  Cowbell     C#2 Tambourin   D2  Shaker
-G#1 Tom grave   A1  Tom médium  A#1 Hat ouvert  B1  Tom aigu
-E1  Conga grave F1  Conga méd.  F#1 Hat fermé   G1  Conga aiguë
-C1  Kick        C#1 Rim         D1  Snare       D#1 Clap
-```
-(rangée du bas = C1 à D#1, comme dans Live)
+Banque 1    C1  Kick         C#1 Rim          D1  Snare        D#1 Clap
+            E1  Conga grave  F1  Conga méd.   F#1 Hat fermé    G1  Conga aiguë
+            G#1 Tom grave    A1  Tom médium   A#1 Hat ouvert   B1  Tom aigu
+            C2  Cowbell      C#2 Tambourin    D2  Shaker       D#2 Ride
 
-Les pads E1, F1, G1, C2, C#2 et D2 jouent ce que ton kit y a mis : dans un 909 Core Kit, les congas sonneront par exemple comme un second kick ou une snare. Pour changer, ouvre le menu **⋯** en haut à droite du séquenceur : clique un élément, puis le pad de ton Drum Rack où il doit jouer (ou règle la note avec − / +). Une note en rouge est hors des 16 pads et reste muette sur un Drum Rack standard.
+Banque 2    E2  Crash        F2  Rimshot      F#2 Snap         G2  Clave
+            G#2 Woodblock    A2  Hat pédale
+```
+
+Les pads de la banque 1 jouent ce que ton kit y a mis : dans un 909 Core Kit, les congas sonneront par exemple comme un second kick ou une snare. Pour changer un instrument de pad :
+
+- **glisse-le** sur un autre pad de la même banque : si le pad est pris, les deux instruments s'échangent ;
+- ou clique le chevron **⌄** d'un pad et choisis l'instrument dans la liste (ça marche d'une banque à l'autre, et ça ajoute l'instrument au kit s'il n'y était pas) ;
+- **Ordre par défaut** remet tout comme ci-dessus.
+
+Les notes de la banque 2 (E2 à A2) ne sonneront que si ton Drum Rack a des pads à ces notes : dans Live, passe à la page suivante des pads du Drum Rack pour les remplir.
 
 ## 5. Ça ne marche pas ?
 
@@ -135,7 +149,7 @@ Les pads E1, F1, G1, C2, C#2 et D2 jouent ce que ton kit y a mis : dans un 909 C
 | Kickstart n'apparaît pas dans Live | Vérifie que le dossier est bien `C:\Program Files\Common Files\VST3\Kickstart.vst3`, que *Utiliser les dossiers système VST3* est activé, puis **Réanalyser**. |
 | Charger Kickstart remplace mon Drum Rack | Normal : un seul instrument par piste. Mets Kickstart sur **sa propre piste** (section 3). |
 | Pas de son | Sur la piste drums : **Monitor sur In** (pas Auto), **MIDI From** sur Kickstart, et la lecture de Live doit être lancée. |
-| Je n'entends qu'une partie du kit, ou un élément joue le mauvais son | Ouvre le menu **⋯** et place chaque élément sur le bon pad (grille 4×4, C1 en bas à gauche). |
+| Je n'entends qu'une partie du kit, ou un élément joue le mauvais son | Ouvre le **Rack** (onglet Pattern) et place chaque instrument sur le pad de ton Drum Rack qui porte le bon son. Les instruments de la banque 2 (crash, rimshot, snap, clave, woodblock, hat pédale) demandent des pads aux notes E2 à A2. |
 | La fenêtre du plugin reste blanche | Installe ou mets à jour *Microsoft Edge WebView2 Runtime* (déjà présent sur la plupart des Windows 10/11). |
 | Le glisser-déposer ne crée pas de clip | Utilise l'export `.mid` (double-clic ou touche E), puis glisse le fichier depuis `Documents\Kickstart MIDI`. |
 
@@ -144,8 +158,8 @@ Les pads E1, F1, G1, C2, C#2 et D2 jouent ce que ton kit y a mis : dans un 909 C
 ## Développement
 
 - `Source/` : processeur JUCE (lecture MIDI calée sur l'hôte, sauvegarde de l'état), fenêtre WebView2, export MIDI.
-- `ui/src/` : interface (HTML, moteur de génération, liaison avec le plugin). `python3 ui/build_ui.py` assemble `ui/kickstart_plugin.html`, embarqué dans le plugin.
+- `ui/src/` : interface (HTML, moteur de génération, liaison avec le plugin, police Manrope). `python3 ui/build_ui.py` assemble `ui/kickstart_plugin.html`, embarqué dans le plugin.
 - Compilation locale : `cmake -B build` puis `cmake --build build --config Release --target Kickstart_VST3`. Sous Windows, le SDK WebView2 s'installe via NuGet (voir `.github/workflows/build.yml`).
 - Chaque push sur `main` compile Windows et macOS (GitHub Actions) et met à jour la release **latest**.
 
-JUCE 8 (formule Starter / AGPLv3) et SDK VST3 (licence MIT).
+JUCE 8 (formule Starter / AGPLv3), SDK VST3 (licence MIT) et police Manrope (SIL Open Font License).

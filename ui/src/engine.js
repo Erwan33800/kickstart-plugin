@@ -1,22 +1,29 @@
 
 /* Pistes affichables, dans l'ordre du séquenceur */
+/* 22 instruments, groupés (g) et colorés (c). Les groupes se suivent : l'ordre de la liste est l'ordre du séquenceur */
 const TRACKS=[
-  {id:'k',name:'Kick',g:0},{id:'sn',name:'Snare',g:0},{id:'cp',name:'Clap',g:0},{id:'rim',name:'Rim',g:0},
-  {id:'ch',name:'Hat fermé',short:'HH f.',g:1},{id:'oh',name:'Hat ouvert',short:'HH o.',g:1},{id:'ride',name:'Ride',g:1},{id:'cb',name:'Cowbell',short:'Cowb.',g:1},
-  {id:'shk',name:'Shaker',g:2},{id:'tamb',name:'Tambourin',short:'Tamb.',g:2},
-  {id:'pl',name:'Conga grave',short:'Cga gr.',g:3},{id:'pm',name:'Conga médium',short:'Cga méd.',g:3},{id:'ph',name:'Conga aiguë',short:'Cga aig.',g:3},{id:'tom',name:'Toms',g:3}];
-const GROUPS=['Fondations','Métaux','Secoués','Peaux'];
+  {id:'k',name:'Kick',g:0,c:'#ff5d73'},{id:'sn',name:'Snare',g:0,c:'#44c2f7'},{id:'cp',name:'Clap',g:0,c:'#7b93ff'},
+  {id:'snap',name:'Snap',g:0,c:'#8ad0ff'},{id:'rim',name:'Rim',g:0,c:'#b48cff'},{id:'rs',name:'Rimshot',g:0,c:'#8f7bff'},
+  {id:'ch',name:'Hat fermé',g:1,c:'#e8d44d'},{id:'hp',name:'Hat pédale',g:1,c:'#d9c84a'},{id:'oh',name:'Hat ouvert',g:1,c:'#f2a93b'},
+  {id:'ride',name:'Ride',g:1,c:'#3fd6b0'},{id:'cr',name:'Crash',g:1,c:'#ffe9a8'},{id:'cb',name:'Cowbell',g:1,c:'#ff8a4c'},
+  {id:'shk',name:'Shaker',g:2,c:'#93d95a'},{id:'tamb',name:'Tambourin',g:2,c:'#c9e04f'},
+  {id:'clv',name:'Clave',g:3,c:'#b9e07a'},{id:'wb',name:'Woodblock',g:3,c:'#8fc98a'},
+  {id:'pl',name:'Conga grave',g:4,c:'#ff7ab8'},{id:'pm',name:'Conga médium',g:4,c:'#f08fd0'},{id:'ph',name:'Conga aiguë',g:4,c:'#e0a0f0'},
+  {id:'th',name:'Tom aigu',g:4,c:'#e9c48a'},{id:'tm',name:'Tom médium',g:4,c:'#d9a06a'},{id:'tl',name:'Tom grave',g:4,c:'#c47f58'}];
+const GROUPS=['Fondations','Métaux','Secoués','Bois','Peaux'];
 const IDS=TRACKS.map(t=>t.id);
 const NAME=Object.fromEntries(TRACKS.map(t=>[t.id,t.name]));
-/* Si une piste du pattern n'est pas dans le kit, son rôle passe à la première piste dispo de la liste */
-const FALLBACK={k:['k'],sn:['sn','cp','rim'],cp:['cp','sn','rim'],rim:['rim'],ch:['ch','shk','tamb'],oh:['oh','ride'],
-  ride:['ride'],cb:['cb'],shk:['shk'],tamb:['tamb'],pl:['pl'],pm:['pm','ph','pl'],ph:['ph'],tom:['tom']};
+/* Si une piste du pattern n'est pas dans le kit, son rôle passe à la première piste dispo de la liste.
+   Crash, snap, clave et woodblock n'ont pas de remplaçant : sans eux, ils ne jouent pas. */
+const FALLBACK={k:['k'],sn:['sn','cp','rim'],cp:['cp','sn','rim'],snap:['snap'],rim:['rim'],rs:['rs','rim'],
+  ch:['ch','hp','shk','tamb'],hp:['hp','ch'],oh:['oh','ride'],ride:['ride'],cr:['cr'],cb:['cb'],shk:['shk'],tamb:['tamb'],
+  clv:['clv'],wb:['wb'],pl:['pl'],pm:['pm','ph','pl'],ph:['ph'],th:['th','tm','tl'],tm:['tm','th','tl'],tl:['tl','tm','th']};
 const PRESETS={
   'Essentiel':['k','sn','cp','ch','oh','rim'],
-  'Groove house':['k','cp','ch','oh','shk','rim','pm','ph'],
-  'Latin':['k','cp','ch','cb','shk','pl','pm','ph','tamb'],
-  'Dub':['k','sn','rim','ch','oh','ride','pm','tom'],
-  'Breaks':['k','sn','ch','oh','ride','rim','tom'],
+  'Groove house':['k','cp','snap','ch','oh','shk','rim','pm','ph'],
+  'Latin':['k','cp','ch','cb','shk','pl','pm','ph','tamb','clv','wb'],
+  'Dub':['k','sn','rim','rs','ch','hp','oh','ride','pm','tl'],
+  'Breaks':['k','sn','ch','oh','ride','rim','th','tm','tl'],
   'Tout':IDS};
 /* Par style : tempo, swing, delay dub, kick (durée, attaque), et la colonne vertébrale utilisée par « Tenter un drop » */
 const GENRE_DEF={
@@ -187,7 +194,7 @@ Object.assign(R,{
     set(b,'rim',[4,12],.5);each(euclid(5,16,c.int(16)),s=>b.pm[s]=.45);return b}}
 });
 
-/* Éléments additionnels : ride, cowbell, shaker, tambourin, congas grave/aiguë, toms */
+/* Éléments additionnels : ride, cowbell, shaker, tambourin, congas grave/aiguë, toms, puis snap, rimshot, hat pédale, clave, woodblock */
 const CONGA_LH=["......h.......h.","...h...l...h..l.","..h.h.....h.l...",".h....l..h....l.","..h...h...h.l.h."];
 function extras(b,c){
   const G=S.genre,M=S.mode,dub=GENRE_DEF[G].dub;
@@ -213,8 +220,33 @@ function extras(b,c){
   else if(M==='surprise'){each(euclid(5,16,c.int(16)),s=>{b[c.r()<.4?'pl':'ph'][s]=.55});if(c.maybe(.5))b.ph[c.pick([7,15])]=.35}
   else each(euclid(7,16,c.int(16)),s=>{b[s%4===0?'pl':'ph'][s]=s%4===0?.65:.55});
   // toms : peu dans le groove, surtout dans les fills
-  if(M==='surprise'&&c.maybe(.35))b.tom[c.pick([7,14])]=.5;
-  if(dub&&M==='classic'&&c.maybe(.25))b.tom[15]=.45;
+  if(M==='surprise'&&c.maybe(.35))b[c.pick(['th','tm','tl'])][c.pick([7,14])]=.5;
+  if(dub&&M==='classic'&&c.maybe(.25))b.tl[15]=.45;
+  // les derniers venus sont tirés après les autres : les motifs précédents ne changent pas. Le crash est posé dans build().
+  const afro=G==='afro',loose=G==='dub'||G==='dubstep'||G==='breaks',back=GENRE_DEF[G].back;
+  // snap : double le clap en house, afro et garage
+  if(G==='house'||afro||G==='garage'){
+    if(M==='classic'){if(c.maybe(.45))set(b,'snap',back,.55)}
+    else if(M==='surprise'){if(c.maybe(.5))b.snap[c.pick([7,15])]=.5}
+    else set(b,'snap',back,.7)}
+  else if(c.maybe(.1))b.snap[c.pick(back)]=.4;
+  // rimshot : surtout dans les styles à delay
+  if(dub){
+    if(M==='classic'){if(c.maybe(.5))set(b,'rs',c.pick([[14],[6,14],[11]]),.5)}
+    else if(M==='surprise')each(euclid(3,8,c.int(8)),s=>b.rs[s]=.5);
+    else set(b,'rs',[4,12],.55)}
+  else if(c.maybe(.15))b.rs[c.pick([7,15])]=.4;
+  // hat pédale : petits coups entre les hats en dub, dubstep et breakbeat
+  if(loose){
+    if(M==='classic'){for(let s=1;s<16;s+=2)if(c.maybe(.4))b.hp[s]=.3}
+    else if(M==='surprise')each(euclid(5,16,c.int(16)),s=>b.hp[s]=.32);
+    else for(let s=1;s<16;s+=2)b.hp[s]=.35}
+  else if(c.maybe(.15))b.hp[c.pick([7,15])]=.3;
+  // clave (3-2 ou rumba) et woodblock : l'afro house
+  if(afro)set(b,'clv',M==='surprise'?[0,3,7,10,12]:[0,3,6,10,12],M==='drop'?.7:.6);
+  else if(M==='surprise'&&c.maybe(.2))each(euclid(5,16,c.int(16)),s=>b.clv[s]=.4);
+  if(afro){if(c.maybe(.6))set(b,'wb',c.pick([[2,5,9,14],[5,9,13],[2,10]]),.45)}
+  else if(c.maybe(.1))b.wb[c.pick([5,13])]=.4;
   return b}
 
 function mutate(b,c){const n=1+c.int(2);
@@ -227,16 +259,18 @@ function mutate(b,c){const n=1+c.int(2);
     else if(c.maybe(.6))b.k[15]=.55}
   return b}
 
+/* Roulement de toms qui descend : aigu, médium, grave, répartis sur les pas donnés */
+function tomRoll(b,ss,v){const T=['th','tm','tl'];ss.forEach((s,i)=>{const id=T[Math.min(2,Math.floor(i*3/ss.length))];b[id][s]=Math.max(b[id][s],v)})}
 function fill(b,c){
   if(S.mode==='classic'){c.pick([[13,15],[14,15],[12,14,15]]).forEach((s,i)=>b.sn[s]=.45+i*.12);if(c.maybe(.5))b.oh[14]=0;
-    if(c.maybe(.5))set(b,'ph',[13,14,15],.5);if(c.maybe(.4))set(b,'tom',[14,15],.6)}
+    if(c.maybe(.5))set(b,'ph',[13,14,15],.5);if(c.maybe(.4))tomRoll(b,[14,15],.6)}
   else if(S.mode==='surprise'){const e=euclid(5,8,c.int(8));
     for(let s=8;s<16;s++)if(e[s-8])b[c.pick(['pm','sn','ph'])][s]=.5+.05*(s-8);
-    set(b,'tom',[12,13,14,15],.0);set(b,'tom',c.pick([[13,14,15],[12,14,15],[14,15]]),.65);
+    tomRoll(b,c.pick([[13,14,15],[12,14,15],[14,15]]),.65);
     if(c.maybe(.5)){b.k[12]=0;b.k[14]=.7}}
   else{for(let s=0;s<8;s+=2)b.sn[s]=Math.max(b.sn[s],.28+s*.03);
     for(let s=8;s<16;s++)b.sn[s]=.45+(s-8)*.075;
-    set(b,'tom',[13,14,15],.8);
+    tomRoll(b,[13,14,15],.8);
     if(c.maybe(.6))b.k[12]=0;b.oh[14]=0;b.ride[14]=0}
   return b}
 
@@ -249,6 +283,7 @@ function build(newSeed){
   const A=extras(R[S.genre][S.mode](c),c),B=mutate(clone(A),c),nb=S.beats/4;
   const order={1:[A],2:[A,B],3:[A,A,B],4:[A,B,A,B]}[nb].map(clone);
   if(nb>1)fill(order[nb-1],c);
+  if(c.maybe(.5)||S.mode==='drop')order[0].cr[0]=.85; // crash sur le premier temps de la boucle
   const raw=Object.fromEntries(IDS.map(id=>[id,order.flatMap(bar=>bar[id])]));
   // projection sur le kit
   const pat={},sig={},n=steps();
@@ -308,13 +343,16 @@ function applyDrop(flavor,seed,n,push){
     for(let bar=0;bar<nb;bar++){const o=bar*16;
       put('k',o+15,.6);if(maybe(.5))put('k',o+pick([7,10]),.7);
       for(let q=3;q<16;q+=4){if(maybe(.5))put(perc,o+q,.45);if(maybe(.4))put('ch',o+q,.55)}}
-    const tomId=first(['tom','pl','pm','sn']);[13,14,15].forEach((s,i)=>put(tomId,last+s,.7+i*.1));
+    const TM=['th','tm','tl'].filter(has);
+    if(TM.length)[13,14,15].forEach((s,i)=>put(TM[Math.min(TM.length-1,Math.floor(i*TM.length/3))],last+s,.7+i*.1));
+    else{const tomId=first(['pl','pm','sn']);[13,14,15].forEach((s,i)=>put(tomId,last+s,.7+i*.1))}
   }else{
     if(nb>1){roll(last,last+8,2);roll(last+8,last+16,1);
       for(let s=last+8;s<last+16;s++)cut('k',s);cut('oh',last+14);cut('ride',last+14)}
     else roll(12,16,1);
     put(first(['ride','oh','cb']),0,1);
   }
+  put('cr',0,.95); // un drop démarre sur un crash
   // les pistes verrouillées ne bougent pas
   S.locks.forEach(id=>{if(S.base[id])p[id]=S.base[id].slice()});
   S.pat=p;S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=DROPS[flavor].name;
@@ -371,6 +409,16 @@ const V={
   pl(t,v){conga(t,v,175,.32,false)},
   pm(t,v){conga(t,v,255,.24,false)},
   ph(t,v){conga(t,v,345,.17,true)},
-  tom(t,v,s=0){const f=190-(s%4)*24,g=ac.createGain();env(g,t,v*.85,.4);osc(t,.4,'sine',f*1.5,f,g);out(g,.35)}
+  tom(t,v,f){const g=ac.createGain();env(g,t,v*.85,.4);osc(t,.4,'sine',f*1.5,f,g);out(g,.35)},
+  th(t,v){V.tom(t,v,235)},tm(t,v){V.tom(t,v,185)},tl(t,v){V.tom(t,v,140)},
+  hp(t,v){if(ohGain){ohGain.gain.cancelScheduledValues(t);ohGain.gain.setTargetAtTime(.0001,t,.01);ohGain=null}
+    const g=ac.createGain();env(g,t,v*.3,.035);nz(t,.05).connect(filt('highpass',7200)).connect(g);out(g)},
+  cr(t,v){const g=ac.createGain(),hp=filt('highpass',4800);env(g,t,v*.2,1.3);
+    [1,1.34,1.71,2.29,2.7].forEach(r=>osc(t,1.3,'square',390*r,0,hp));hp.connect(g);
+    const g2=ac.createGain();env(g2,t,v*.3,1.1);nz(t,1.2).connect(filt('highpass',6000)).connect(g2);out(g);out(g2)},
+  rs(t,v){const g=ac.createGain(),bp=filt('bandpass',1400,1.4);env(g,t,v*.8,.09);nz(t,.1).connect(bp);osc(t,.08,'triangle',900,500,bp);bp.connect(g);out(g,.4)},
+  snap(t,v){const g=ac.createGain(),bp=filt('bandpass',2600,3.5);env(g,t,v*.7,.07,.001);nz(t,.08).connect(bp);bp.connect(g);out(g,.3)},
+  clv(t,v){const g=ac.createGain();env(g,t,v*.6,.14);osc(t,.16,'sine',2500,2450,g);out(g,.3)},
+  wb(t,v){const g=ac.createGain(),bp=filt('bandpass',1000,4);env(g,t,v*.7,.11);osc(t,.12,'triangle',900,780,bp);bp.connect(g);out(g,.3)}
 };
 
