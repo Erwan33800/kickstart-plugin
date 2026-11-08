@@ -20,13 +20,15 @@ Kickstart est un plugin VST3 pour Ableton Live qui génère rapidement des patte
 - **Longueur** : 1 à 4 mesures (4 à 16 temps), structure A / B / A / B avec un fill sur la dernière mesure.
 - **Kit à composer** (22 instruments, groupes Fondations, Métaux, Secoués, Bois, Peaux) : voir la section « Interface » pour la liste et les notes. Kits tout faits : Essentiel, Groove house, Latin, Dub, Breaks, Tout. Retirer un instrument redistribue son rôle (`FALLBACK`) ; crash, snap, clave et woodblock n'ont pas de remplaçant.
 - **« Tenter un drop »** : garde la structure du pattern courant et le pousse en drop, avec trois couleurs (Plein régime, Rebond, Montée) adaptées au squelette du style, et un crash sur le premier temps. « Revenir à l'original » revient au pattern de départ.
+- **« Breakdown »** (touche B) : le pendant du drop, dérivé du même pattern de base (`S.base`), avec trois couleurs : Dépouillé (kick et backbeat retirés, roulement de caisse claire avant le retour), Percussif (plus de kick ni de hats, les percs passent devant, descente de toms), Respiration (un kick doux par mesure, il revient sur la dernière mesure). Drop et breakdown se remplacent l'un l'autre (`S.derived` = `''`, `'drop'` ou `'break'`), accent ambre `#f5b94d`. Fonctions `applyBreak` / `tryBreak`, noms dans `BREAKS`.
+- **Dynamique** (`S.dyn`, 0 à 1, défaut 0.5) : `humanize()` dans `build()` ajoute des accents métriques et des variations de vélocité par instrument (`DYN`). Tirage avec sa propre seed : les positions des notes ne changent pas, seulement les vélocités. La molette sur une note allumée règle sa vélocité à la main. Pas de micro-timing : le format du pattern ne porte que des vélocités par pas (ce serait un changement de `Pattern.h`).
 - **Édition** : clic ou glisser pour peindre, Maj + clic pour une note fantôme, verrouiller (la piste survit à Générer) ou couper une piste.
 - **Historique** des 5 derniers beats, **annuler** (Z), densité et swing réglables.
 - **Rack** : 2 banques de 16 pads (C1-D#2, E2-G3) pour placer chaque instrument sur le pad de son Drum Rack (glisser, ou chevron ⌄).
 - **Export** : glisser-déposer du MIDI vers Live (bouton « ⇲ Glisser le MIDI »), ou double-clic / touche E pour écrire un `.mid` dans `Documents\Kickstart MIDI`.
 - **Sauvegarde** : pattern, kit, notes et historique sont enregistrés avec le set Live (état du plugin).
 
-Raccourcis : G générer, D drop, Z annuler, 1/2 type, ← → style, E export, Espace lecture (hors plugin seulement).
+Raccourcis : G générer, D drop, B breakdown, Z annuler, 1/2 type, ← → style, E export, Espace lecture (hors plugin seulement).
 
 ## Historique et décisions (pourquoi c'est comme ça)
 
@@ -62,7 +64,7 @@ Inspiration : le plugin ADSR Drum Machine (look plat, tuiles arrondies, nom d'in
   - Le drop n'est plus un type : il a son bouton. Quand il est actif, une ligne « Drop … · vN · revenir à l'original » apparaît sous la bande.
   - Séquenceur : pistes avec lock/mute toujours visibles, nom coloré, défilement vertical si le kit dépasse la hauteur.
 - **Onglet Style & kit** : les 9 styles en une rangée de tuiles (un clic génère), puis kits prêts à l'emploi et instruments par groupe (Fondations, Métaux, Secoués, Bois, Peaux).
-- **Barre du bas** : Générer (G, bouton plein), Tenter un drop (D), 5 derniers beats, annuler (Z), glisser le MIDI vers Live (double-clic ou E : export .mid).
+- **Barre du bas** : Générer (G, bouton plein), Tenter un drop (D), Breakdown (B), 5 derniers beats, annuler (Z), glisser le MIDI vers Live (double-clic ou E : export .mid). La bande de réglages contient aussi **Dynamique**.
 
 **Visuel** : thème sombre plat, tuiles de même langage partout (styles, kits, pads), tuile active remplie de l'accent du type (classique `#5fd4b8`, surprenant `#a98cf5`, drop `#ff6b57`). Police **Manrope** (SIL OFL, sous-ensemble latin, `ui/src/manrope-latin.woff2`), intégrée en base64 par `build_ui.py` à la place du marqueur `__MANROPE__` : le WebView est hors ligne. Couleur de chaque instrument : champ `c` de `TRACKS` dans `engine.js`.
 
@@ -155,6 +157,7 @@ Dans l'interface, une vélocité est stockée entre 0 et 1 (`S.pat[id][pas]`) ; 
 
 - **Tester la refonte dans Live** (compilée en local) avant de merger `develop` sur `main` : fenêtre 1120 x 740, Rack et banques, glisser du MIDI, sauvegarde et rechargement d'un set (l'ancien état est ignoré, c'est voulu), pads de la banque 2 sur un Drum Rack.
 - Plus de styles (jungle, footwork, electro, amapiano, reggaeton, lo-fi hip-hop).
-- « Breakdown » et « Rendre surprenant », sur le modèle de « Tenter un drop ».
+- « Rendre surprenant », sur le modèle de « Tenter un drop » et du breakdown.
+- Micro-timing (petits décalages de chaque note) : demande d'étendre le format de pattern et `Pattern.h` / `MidiExport.cpp`.
 - Favoris (étoile) dans l'historique pour qu'un beat ne soit pas poussé dehors.
 - Remplacer le synthé de secours par des samples légers pour la version autonome.

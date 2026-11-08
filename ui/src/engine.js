@@ -43,10 +43,12 @@ const HINTS={
 
 const S={genre:'house',mode:'classic',beats:8,bpm:124,swing:54,dens:.6,seed:0,pat:{},sig:{},
   kit:new Set(PRESETS['Groove house']),locks:new Set(),mutes:new Set(),hist:[],
-  base:null,baseMode:'',dropName:'',dropN:0,lastFlavor:-1};
+  base:null,baseMode:'',dropName:'',dropN:0,lastFlavor:-1,lastBrkFlavor:-1,
+  derived:'',   // '' = pattern de base, 'drop' ou 'break' = dérivé de S.base (drop et breakdown partagent baseMode, dropName, dropN, dropFlavor, dropSeed)
+  dyn:.5};      // dynamique : accents et variations de vélocité (0 = machine, 1 = très vivant)
 const copyPat=p=>Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v.slice()]));
 function snapshot(){return{pat:copyPat(S.pat),sig:{...S.sig},seed:S.seed,beats:S.beats,genre:S.genre,mode:S.mode,kit:new Set(S.kit),
-  base:S.base&&copyPat(S.base),baseMode:S.baseMode,dropName:S.dropName,dropN:S.dropN,dropFlavor:S.dropFlavor,dropSeed:S.dropSeed}}
+  base:S.base&&copyPat(S.base),baseMode:S.baseMode,dropName:S.dropName,dropN:S.dropN,dropFlavor:S.dropFlavor,dropSeed:S.dropSeed,derived:S.derived}}
 function pushHist(){if(Object.keys(S.pat).length){S.hist.push(snapshot());if(S.hist.length>30)S.hist.shift()}}
 const steps=()=>S.beats*4;
 const active=()=>IDS.filter(id=>S.kit.has(id));
@@ -274,16 +276,31 @@ function fill(b,c){
     if(c.maybe(.6))b.k[12]=0;b.oh[14]=0;b.ride[14]=0}
   return b}
 
+/* Dynamique : accents sur les temps forts et variations de vélocité propres à chaque instrument.
+   DYN[id] = [force de l'accent métrique, variation aléatoire]. Les hats, ride et shaker bougent beaucoup, le kick à peine.
+   Le tirage a sa propre seed : les motifs ne changent pas, seulement leurs vélocités. */
+const DYN={k:[.25,.06],sn:[.2,.1],cp:[.2,.1],snap:[.2,.1],rim:[.4,.15],rs:[.4,.12],ch:[1,.22],hp:[.8,.2],oh:[.5,.14],ride:[1,.18],cr:[0,.05],cb:[.4,.15],
+  shk:[1,.28],tamb:[.8,.22],clv:[.3,.12],wb:[.3,.12],pl:[.3,.22],pm:[.3,.22],ph:[.3,.22],th:[.2,.14],tm:[.2,.14],tl:[.2,.14]};
+function humanize(bars,r,amt){
+  if(amt<=0)return;
+  bars.forEach(bar=>IDS.forEach(id=>{const v=bar[id],[acc,rnd]=DYN[id];
+    for(let s=0;s<16;s++){const x=v[s];if(!x)continue;
+      const pos=s%4===0?1:s%4===2?.35:-.6;      // temps fort, contretemps, double-croche impaire
+      const ghost=x<.35?.5:1;                    // les notes fantômes varient moins
+      const d=(amt*acc*pos*.3+(r()-.5)*2*amt*rnd)*ghost;
+      v[s]=Math.min(1,Math.max(.12,x*(1+d)))}}))}
+
 /* Construit le pattern brut (toujours toutes les pistes, même tirage) puis le projette sur le kit choisi */
 function build(newSeed){
   if(newSeed){pushHist();S.seed=Math.floor(Math.random()*99999)}
-  S.base=null;S.dropN=0;
+  S.base=null;S.dropN=0;S.derived='';
   const r=mulberry(S.seed),f=S.dens*1.6;
   const c={r,maybe:p=>r()<Math.min(1,p*f),int:n=>Math.floor(r()*n),pick:a=>a[Math.floor(r()*a.length)]};
   const A=extras(R[S.genre][S.mode](c),c),B=mutate(clone(A),c),nb=S.beats/4;
   const order={1:[A],2:[A,B],3:[A,A,B],4:[A,B,A,B]}[nb].map(clone);
   if(nb>1)fill(order[nb-1],c);
   if(c.maybe(.5)||S.mode==='drop')order[0].cr[0]=.85; // crash sur le premier temps de la boucle
+  humanize(order,mulberry(S.seed*131+17),S.dyn);
   const raw=Object.fromEntries(IDS.map(id=>[id,order.flatMap(bar=>bar[id])]));
   // projection sur le kit
   const pat={},sig={},n=steps();
@@ -307,7 +324,7 @@ const DROPS=[
 const MODE_LABEL={classic:'classique',surprise:'surprenant',drop:'drop'};
 function tryDrop(){S.curId=null;
   let f;do{f=Math.floor(Math.random()*DROPS.length)}while(f===S.lastFlavor&&DROPS.length>1);
-  S.lastFlavor=f;applyDrop(f,Math.floor(Math.random()*99999),(S.base?S.dropN:0)+1,true);record()}
+  S.lastFlavor=f;applyDrop(f,Math.floor(Math.random()*99999),(S.base&&S.derived==='drop'?S.dropN:0)+1,true);record()}
 function applyDrop(flavor,seed,n,push){
   if(push)pushHist();
   if(!S.base){S.base=copyPat(S.pat);S.baseMode=S.mode}
@@ -355,15 +372,63 @@ function applyDrop(flavor,seed,n,push){
   put('cr',0,.95); // un drop démarre sur un crash
   // les pistes verrouillées ne bougent pas
   S.locks.forEach(id=>{if(S.base[id])p[id]=S.base[id].slice()});
-  S.pat=p;S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=DROPS[flavor].name;
+  S.pat=p;S.derived='drop';S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=DROPS[flavor].name;
   render();
 }
-function backToOriginal(){if(!S.base)return;S.curId=null;pushHist();S.pat=S.base;S.base=null;S.dropN=0;render()}
+
+/* ---------- breakdown : l'inverse du drop, à partir du pattern de base ---------- */
+const BREAKS=[
+  {name:'Dépouillé',txt:'kick et backbeat retirés, hats et percs restent, roulement avant le retour'},
+  {name:'Percussif',txt:'plus de kick ni de hats : les percs passent devant, descente de toms à la fin'},
+  {name:'Respiration',txt:'un kick doux par mesure, hats clairsemés, le kick revient sur la dernière mesure avec un roulement'}];
+const DERIVED_NAME={drop:'Drop',break:'Breakdown'};
+const DER=()=>S.derived==='break'?BREAKS:DROPS;
+function tryBreak(){S.curId=null;
+  let f;do{f=Math.floor(Math.random()*BREAKS.length)}while(f===S.lastBrkFlavor&&BREAKS.length>1);
+  S.lastBrkFlavor=f;applyBreak(f,Math.floor(Math.random()*99999),(S.base&&S.derived==='break'?S.dropN:0)+1,true);record()}
+function applyBreak(flavor,seed,n,push){
+  if(push)pushHist();
+  if(!S.base){S.base=copyPat(S.pat);S.baseMode=S.mode}
+  const p=copyPat(S.base),r=mulberry(seed),maybe=x=>r()<x;
+  const N=steps(),nb=Math.max(1,N/16),last=nb>1?(nb-1)*16:0;
+  const has=id=>!!p[id];
+  const put=(id,s,v)=>{if(has(id))p[id][s]=Math.max(p[id][s],Math.min(1,v))};
+  const clear=ids=>ids.forEach(id=>{if(has(id))p[id]=p[id].map(()=>0)});
+  const scale=(ids,k)=>ids.forEach(id=>{if(has(id))p[id]=p[id].map(v=>v?Math.min(1,Math.max(.12,v*k)):0)});
+  const first=ids=>ids.find(has);
+  const PERC=['rim','rs','cb','clv','wb','pl','pm','ph','tamb','shk'];
+  if(flavor===1&&!PERC.some(has))flavor=0; // pas de percs dans le kit : on retombe sur le dépouillé
+  // montée de caisse claire : crescendo entre deux pas
+  const roll=(from,to,step,top)=>{const id=first(['sn','cp','rim','rs']);if(!id)return;
+    for(let s=from;s<to;s+=step)put(id,s,.3+(top-.3)*((s-from)/(to-from)))};
+  clear(['k','sn','cp','snap']); // dans tous les breakdowns : plus de grave ni de backbeat
+  if(flavor===0){
+    scale(['ch','hp','oh','ride'],.8);
+    roll(last+8,last+16,2,.85);
+  }else if(flavor===1){
+    clear(['ch','hp','oh']);scale(PERC,1.15);
+    PERC.filter(has).forEach(id=>{const src=p[id].slice();
+      for(let s=0;s<N;s++)if(src[s]&&maybe(.5)){const t=s-s%16+((s%16)+8)%16;if(!p[id][t])p[id][t]=src[s]*.8}});
+    const TM=['th','tm','tl'].filter(has);
+    if(TM.length)[13,14,15].forEach((s,i)=>put(TM[Math.min(TM.length-1,Math.floor(i*TM.length/3))],last+s,.7+i*.1));
+  }else{
+    ['ch','hp'].forEach(id=>{if(has(id))for(let s=1;s<N;s+=2)p[id][s]=0});
+    for(let bar=0;bar<nb-1;bar++)put('k',bar*16,.7);
+    if(nb===1)put('k',0,.7);
+    put('k',last+12,.9);
+    roll(last+8,last+16,2,.85);
+  }
+  put('cr',0,.9);
+  S.locks.forEach(id=>{if(S.base[id])p[id]=S.base[id].slice()});
+  S.pat=p;S.derived='break';S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=BREAKS[flavor].name;
+  render();
+}
+function backToOriginal(){if(!S.base)return;S.curId=null;pushHist();S.pat=S.base;S.base=null;S.dropN=0;S.derived='';render()}
 function rebuildKit(){
-  const was=S.base?{f:S.dropFlavor,seed:S.dropSeed,n:S.dropN}:null;
+  const was=S.base?{kind:S.derived,f:S.dropFlavor,seed:S.dropSeed,n:S.dropN}:null;
   if(was)S.pat=S.base;
   build(false);
-  if(was)applyDrop(was.f,was.seed,was.n,false)}
+  if(was)(was.kind==='break'?applyBreak:applyDrop)(was.f,was.seed,was.n,false)}
 /* ---------- audio ---------- */
 let ac,master,noiseBuf,send,dly,ohGain=null;
 function initAudio(){

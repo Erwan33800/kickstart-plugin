@@ -12,14 +12,14 @@
 :root{
   --bg:#151516; --panel:#1d1d1f; --tile:#2a2a2d; --tile-hi:#343438; --cell:#28282b; --cell-beat:#313135; --line:#2c2c30;
   --fg:#f1f0ee; --dim:#a4a4aa; --faint:#6f6f77;
-  --classic:#5fd4b8; --surprise:#a98cf5; --drop:#ff6b57; --hit:var(--classic);
+  --classic:#5fd4b8; --surprise:#a98cf5; --drop:#ff6b57; --break:#f5b94d; --hit:var(--classic);
   --sans:"Manrope","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
   --mono:"Cascadia Mono",Consolas,ui-monospace,Menlo,monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;min-width:980px;min-height:620px;overflow:hidden;background:var(--bg);color:var(--fg);font:500 13px/1.35 var(--sans);-webkit-font-smoothing:antialiased;user-select:none}
-body[data-mode="surprise"]{--hit:var(--surprise)} body[data-mode="drop"]{--hit:var(--drop)}
+body[data-mode="surprise"]{--hit:var(--surprise)} body[data-mode="drop"]{--hit:var(--drop)} body[data-mode="break"]{--hit:var(--break)}
 button{font:inherit;color:inherit;margin:0;cursor:pointer}
 [hidden]{display:none!important}
 :focus-visible{outline:1px solid var(--fg);outline-offset:1px}
@@ -99,7 +99,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 .kitlink b{color:var(--fg);font-weight:600}
 .kitlink:hover{background:var(--tile-hi)}
 .derive{display:flex;align-items:center;gap:10px;font-size:12px;height:20px}
-.derive .tag{color:var(--drop);font-weight:700}
+.derive .tag{color:var(--hit);font-weight:700}
 .link{border:0;background:none;color:var(--dim);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--tile-hi);padding:0;font-size:12px}
 .link:hover{color:var(--fg)}
 
@@ -181,18 +181,22 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 
 /* barre d'actions */
 .act{display:flex;align-items:center;gap:12px;padding:0 14px}
-.gen{height:50px;width:200px;border:0;border-radius:10px;background:var(--hit);color:#101012;font-weight:800;font-size:15px;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .06s,background .25s}
+.gen{height:50px;width:180px;border:0;border-radius:10px;background:var(--hit);color:#101012;font-weight:800;font-size:15px;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .06s,background .25s}
 .gen:hover{filter:brightness(1.08)}
 .gen:active{transform:scale(.98)}
 .gen kbd,.dropb kbd{font:500 10.5px var(--mono);border-radius:4px;padding:1px 6px;background:rgba(0,0,0,.18)}
-.dropb{height:50px;width:166px;border-radius:10px;border:0;background:color-mix(in oklab,var(--drop) 14%,var(--panel));color:var(--drop);font-weight:800;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:9px}
+.dropb,.brkb{height:50px;width:150px;border-radius:10px;border:0;background:color-mix(in oklab,var(--drop) 14%,var(--panel));color:var(--drop);font-weight:800;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:9px}
 .dropb kbd{background:color-mix(in oklab,var(--drop) 18%,transparent)}
 .dropb:hover{background:color-mix(in oklab,var(--drop) 24%,var(--panel))}
 .dropb:active{transform:scale(.98)}
+.brkb{background:color-mix(in oklab,var(--break) 14%,var(--panel));color:var(--break)}
+.brkb kbd{background:color-mix(in oklab,var(--break) 18%,transparent)}
+.brkb:hover{background:color-mix(in oklab,var(--break) 24%,var(--panel))}
+.brkb:active{transform:scale(.98)}
 .hist{display:grid;gap:6px;margin-left:4px}
 .hd{display:flex;gap:5px;align-items:center;min-height:18px}
 .hdot{--mc:var(--classic);width:18px;height:18px;border-radius:5px;border:0;padding:0;background:color-mix(in oklab,var(--mc) 30%,var(--panel))}
-.hdot[data-m="surprise"]{--mc:var(--surprise)} .hdot[data-m="drop"]{--mc:var(--drop)}
+.hdot[data-m="surprise"]{--mc:var(--surprise)} .hdot[data-m="drop"]{--mc:var(--drop)} .hdot[data-m="break"]{--mc:var(--break)}
 .hdot:hover{background:color-mix(in oklab,var(--mc) 65%,var(--panel))}
 .hdot[aria-pressed="true"]{background:var(--mc);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--mc)}
 .midi{margin-left:auto;height:50px;display:flex;align-items:center;gap:11px;padding:0 14px 0 10px;border-radius:10px;border:0;background:var(--panel);cursor:grab;text-align:left}
@@ -241,7 +245,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
             <button class="vb sel" id="lenBtn" aria-haspopup="listbox" aria-expanded="false"><span id="lenTxt"></span><svg viewBox="0 0 10 10"><path d="M2 3.5 5 6.5l3-3"/></svg></button>
             <div class="menu" id="lenMenu" role="listbox" hidden></div>
           </div>
-          <div id="fSwing"></div><div id="fDens"></div>
+          <div id="fSwing"></div><div id="fDens"></div><div id="fDyn"></div>
           <button class="kitlink" id="kitLink" title="Changer de kit">Kit · <b id="kitName"></b> ▾</button>
         </div>
         <div class="derive" id="derive" hidden><span class="tag" id="dtag"></span><button class="link" id="orig">revenir à l'original</button></div>
@@ -259,6 +263,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
   <footer class="act">
     <button class="gen" id="gen" title="Nouveau pattern (G)">Générer <kbd>G</kbd></button>
     <button class="dropb" id="drop" title="Garde la structure et la pousse en drop (D)">Tenter un drop <kbd>D</kbd></button>
+    <button class="brkb" id="brk" title="Garde la structure et la dépouille en breakdown (B)">Breakdown <kbd>B</kbd></button>
     <div class="hist"><span class="lab">Derniers beats</span><div class="hd" id="hdots"></div></div>
     <button class="ib" id="back" aria-label="Annuler" title="Annuler (Z)" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 5 3.5 9l4 4"/><path d="M3.5 9h8a5 5 0 0 1 0 10H9"/></svg></button>
     <button class="midi" id="midi" title="Maintiens et glisse vers une piste ou un slot de Live. Double-clic ou E : exporter un .mid"><span class="file">MIDI</span><span><b>Glisser le MIDI</b><small>vers Live · double-clic : exporter</small></span></button>
@@ -311,10 +316,12 @@ const HINTS={
 
 const S={genre:'house',mode:'classic',beats:8,bpm:124,swing:54,dens:.6,seed:0,pat:{},sig:{},
   kit:new Set(PRESETS['Groove house']),locks:new Set(),mutes:new Set(),hist:[],
-  base:null,baseMode:'',dropName:'',dropN:0,lastFlavor:-1};
+  base:null,baseMode:'',dropName:'',dropN:0,lastFlavor:-1,lastBrkFlavor:-1,
+  derived:'',   // '' = pattern de base, 'drop' ou 'break' = dérivé de S.base (drop et breakdown partagent baseMode, dropName, dropN, dropFlavor, dropSeed)
+  dyn:.5};      // dynamique : accents et variations de vélocité (0 = machine, 1 = très vivant)
 const copyPat=p=>Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v.slice()]));
 function snapshot(){return{pat:copyPat(S.pat),sig:{...S.sig},seed:S.seed,beats:S.beats,genre:S.genre,mode:S.mode,kit:new Set(S.kit),
-  base:S.base&&copyPat(S.base),baseMode:S.baseMode,dropName:S.dropName,dropN:S.dropN,dropFlavor:S.dropFlavor,dropSeed:S.dropSeed}}
+  base:S.base&&copyPat(S.base),baseMode:S.baseMode,dropName:S.dropName,dropN:S.dropN,dropFlavor:S.dropFlavor,dropSeed:S.dropSeed,derived:S.derived}}
 function pushHist(){if(Object.keys(S.pat).length){S.hist.push(snapshot());if(S.hist.length>30)S.hist.shift()}}
 const steps=()=>S.beats*4;
 const active=()=>IDS.filter(id=>S.kit.has(id));
@@ -542,16 +549,31 @@ function fill(b,c){
     if(c.maybe(.6))b.k[12]=0;b.oh[14]=0;b.ride[14]=0}
   return b}
 
+/* Dynamique : accents sur les temps forts et variations de vélocité propres à chaque instrument.
+   DYN[id] = [force de l'accent métrique, variation aléatoire]. Les hats, ride et shaker bougent beaucoup, le kick à peine.
+   Le tirage a sa propre seed : les motifs ne changent pas, seulement leurs vélocités. */
+const DYN={k:[.25,.06],sn:[.2,.1],cp:[.2,.1],snap:[.2,.1],rim:[.4,.15],rs:[.4,.12],ch:[1,.22],hp:[.8,.2],oh:[.5,.14],ride:[1,.18],cr:[0,.05],cb:[.4,.15],
+  shk:[1,.28],tamb:[.8,.22],clv:[.3,.12],wb:[.3,.12],pl:[.3,.22],pm:[.3,.22],ph:[.3,.22],th:[.2,.14],tm:[.2,.14],tl:[.2,.14]};
+function humanize(bars,r,amt){
+  if(amt<=0)return;
+  bars.forEach(bar=>IDS.forEach(id=>{const v=bar[id],[acc,rnd]=DYN[id];
+    for(let s=0;s<16;s++){const x=v[s];if(!x)continue;
+      const pos=s%4===0?1:s%4===2?.35:-.6;      // temps fort, contretemps, double-croche impaire
+      const ghost=x<.35?.5:1;                    // les notes fantômes varient moins
+      const d=(amt*acc*pos*.3+(r()-.5)*2*amt*rnd)*ghost;
+      v[s]=Math.min(1,Math.max(.12,x*(1+d)))}}))}
+
 /* Construit le pattern brut (toujours toutes les pistes, même tirage) puis le projette sur le kit choisi */
 function build(newSeed){
   if(newSeed){pushHist();S.seed=Math.floor(Math.random()*99999)}
-  S.base=null;S.dropN=0;
+  S.base=null;S.dropN=0;S.derived='';
   const r=mulberry(S.seed),f=S.dens*1.6;
   const c={r,maybe:p=>r()<Math.min(1,p*f),int:n=>Math.floor(r()*n),pick:a=>a[Math.floor(r()*a.length)]};
   const A=extras(R[S.genre][S.mode](c),c),B=mutate(clone(A),c),nb=S.beats/4;
   const order={1:[A],2:[A,B],3:[A,A,B],4:[A,B,A,B]}[nb].map(clone);
   if(nb>1)fill(order[nb-1],c);
   if(c.maybe(.5)||S.mode==='drop')order[0].cr[0]=.85; // crash sur le premier temps de la boucle
+  humanize(order,mulberry(S.seed*131+17),S.dyn);
   const raw=Object.fromEntries(IDS.map(id=>[id,order.flatMap(bar=>bar[id])]));
   // projection sur le kit
   const pat={},sig={},n=steps();
@@ -575,7 +597,7 @@ const DROPS=[
 const MODE_LABEL={classic:'classique',surprise:'surprenant',drop:'drop'};
 function tryDrop(){S.curId=null;
   let f;do{f=Math.floor(Math.random()*DROPS.length)}while(f===S.lastFlavor&&DROPS.length>1);
-  S.lastFlavor=f;applyDrop(f,Math.floor(Math.random()*99999),(S.base?S.dropN:0)+1,true);record()}
+  S.lastFlavor=f;applyDrop(f,Math.floor(Math.random()*99999),(S.base&&S.derived==='drop'?S.dropN:0)+1,true);record()}
 function applyDrop(flavor,seed,n,push){
   if(push)pushHist();
   if(!S.base){S.base=copyPat(S.pat);S.baseMode=S.mode}
@@ -623,15 +645,63 @@ function applyDrop(flavor,seed,n,push){
   put('cr',0,.95); // un drop démarre sur un crash
   // les pistes verrouillées ne bougent pas
   S.locks.forEach(id=>{if(S.base[id])p[id]=S.base[id].slice()});
-  S.pat=p;S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=DROPS[flavor].name;
+  S.pat=p;S.derived='drop';S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=DROPS[flavor].name;
   render();
 }
-function backToOriginal(){if(!S.base)return;S.curId=null;pushHist();S.pat=S.base;S.base=null;S.dropN=0;render()}
+
+/* ---------- breakdown : l'inverse du drop, à partir du pattern de base ---------- */
+const BREAKS=[
+  {name:'Dépouillé',txt:'kick et backbeat retirés, hats et percs restent, roulement avant le retour'},
+  {name:'Percussif',txt:'plus de kick ni de hats : les percs passent devant, descente de toms à la fin'},
+  {name:'Respiration',txt:'un kick doux par mesure, hats clairsemés, le kick revient sur la dernière mesure avec un roulement'}];
+const DERIVED_NAME={drop:'Drop',break:'Breakdown'};
+const DER=()=>S.derived==='break'?BREAKS:DROPS;
+function tryBreak(){S.curId=null;
+  let f;do{f=Math.floor(Math.random()*BREAKS.length)}while(f===S.lastBrkFlavor&&BREAKS.length>1);
+  S.lastBrkFlavor=f;applyBreak(f,Math.floor(Math.random()*99999),(S.base&&S.derived==='break'?S.dropN:0)+1,true);record()}
+function applyBreak(flavor,seed,n,push){
+  if(push)pushHist();
+  if(!S.base){S.base=copyPat(S.pat);S.baseMode=S.mode}
+  const p=copyPat(S.base),r=mulberry(seed),maybe=x=>r()<x;
+  const N=steps(),nb=Math.max(1,N/16),last=nb>1?(nb-1)*16:0;
+  const has=id=>!!p[id];
+  const put=(id,s,v)=>{if(has(id))p[id][s]=Math.max(p[id][s],Math.min(1,v))};
+  const clear=ids=>ids.forEach(id=>{if(has(id))p[id]=p[id].map(()=>0)});
+  const scale=(ids,k)=>ids.forEach(id=>{if(has(id))p[id]=p[id].map(v=>v?Math.min(1,Math.max(.12,v*k)):0)});
+  const first=ids=>ids.find(has);
+  const PERC=['rim','rs','cb','clv','wb','pl','pm','ph','tamb','shk'];
+  if(flavor===1&&!PERC.some(has))flavor=0; // pas de percs dans le kit : on retombe sur le dépouillé
+  // montée de caisse claire : crescendo entre deux pas
+  const roll=(from,to,step,top)=>{const id=first(['sn','cp','rim','rs']);if(!id)return;
+    for(let s=from;s<to;s+=step)put(id,s,.3+(top-.3)*((s-from)/(to-from)))};
+  clear(['k','sn','cp','snap']); // dans tous les breakdowns : plus de grave ni de backbeat
+  if(flavor===0){
+    scale(['ch','hp','oh','ride'],.8);
+    roll(last+8,last+16,2,.85);
+  }else if(flavor===1){
+    clear(['ch','hp','oh']);scale(PERC,1.15);
+    PERC.filter(has).forEach(id=>{const src=p[id].slice();
+      for(let s=0;s<N;s++)if(src[s]&&maybe(.5)){const t=s-s%16+((s%16)+8)%16;if(!p[id][t])p[id][t]=src[s]*.8}});
+    const TM=['th','tm','tl'].filter(has);
+    if(TM.length)[13,14,15].forEach((s,i)=>put(TM[Math.min(TM.length-1,Math.floor(i*TM.length/3))],last+s,.7+i*.1));
+  }else{
+    ['ch','hp'].forEach(id=>{if(has(id))for(let s=1;s<N;s+=2)p[id][s]=0});
+    for(let bar=0;bar<nb-1;bar++)put('k',bar*16,.7);
+    if(nb===1)put('k',0,.7);
+    put('k',last+12,.9);
+    roll(last+8,last+16,2,.85);
+  }
+  put('cr',0,.9);
+  S.locks.forEach(id=>{if(S.base[id])p[id]=S.base[id].slice()});
+  S.pat=p;S.derived='break';S.dropFlavor=flavor;S.dropSeed=seed;S.dropN=n;S.dropName=BREAKS[flavor].name;
+  render();
+}
+function backToOriginal(){if(!S.base)return;S.curId=null;pushHist();S.pat=S.base;S.base=null;S.dropN=0;S.derived='';render()}
 function rebuildKit(){
-  const was=S.base?{f:S.dropFlavor,seed:S.dropSeed,n:S.dropN}:null;
+  const was=S.base?{kind:S.derived,f:S.dropFlavor,seed:S.dropSeed,n:S.dropN}:null;
   if(was)S.pat=S.base;
   build(false);
-  if(was)applyDrop(was.f,was.seed,was.n,false)}
+  if(was)(was.kind==='break'?applyBreak:applyDrop)(was.f,was.seed,was.n,false)}
 /* ---------- audio ---------- */
 let ac,master,noiseBuf,send,dly,ohGain=null;
 function initAudio(){
@@ -739,7 +809,9 @@ function patternString(){
   return `${n}_${S.swing}_${S.swingClip?1:0}/`+rows.join('/')}
 let pushT;
 function pushPattern(){clearTimeout(pushT);pushT=setTimeout(()=>toMax('pattern',patternString()),20)}
-function clipName(){return `Kickstart · ${GENRE_LABEL[S.genre]} ${S.base?'drop '+S.dropName.toLowerCase():MODE_NAME[S.mode].toLowerCase()}`}
+const modeKey=h=>h.base?(h.derived==='break'?'break':'drop'):h.mode; // couleur d'accent : type, drop ou breakdown
+const derivedLabel=h=>`${DERIVED_NAME[h.derived||'drop'].toLowerCase()} ${h.dropName.toLowerCase()}`;
+function clipName(){return `Kickstart · ${GENRE_LABEL[S.genre]} ${S.base?derivedLabel(S):MODE_NAME[S.mode].toLowerCase()}`}
 /* Pas d'accès aux clips depuis un VST : on glisse le MIDI vers Live, ou on l'exporte en .mid */
 function writeClip(){
   if(!IN_PLUGIN){showMsg('Hors du plugin : export indisponible.',true);return}
@@ -803,7 +875,9 @@ const vSw=vbox($('fSwing'),'Swing',{min:50,max:75,get:()=>S.swing,set:v=>{S.swin
   tip:'Glisse ou molette. Double-clic : swing du style.',commit:()=>{pushPattern();touchRecent()}});
 const vDe=vbox($('fDens'),'Densité',{min:0,max:100,get:()=>Math.round(S.dens*100),set:v=>{S.dens=v/100},fmt:v=>String(v),reset:()=>60,
   tip:'Glisse ou molette. Régénère au relâchement. Double-clic : 60.',commit:()=>generate()});
-const showSwing=()=>vSw.show(),showDens=()=>vDe.show();
+const vDy=vbox($('fDyn'),'Dynamique',{min:0,max:100,get:()=>Math.round(S.dyn*100),set:v=>{S.dyn=v/100},fmt:v=>String(v),reset:()=>50,
+  tip:'Accents sur les temps et variations de vélocité. Régénère au relâchement. Double-clic : 50.',commit:()=>generate()});
+const showSwing=()=>vSw.show(),showDens=()=>vDe.show(),showDyn=()=>vDy.show();
 
 function setGenre(g){if(g===S.genre)return;S.genre=g;const d=GENRE_DEF[g];S.swing=d.swing;if(!IN_PLUGIN){S.bpm=d.bpm;$('bpm').textContent=S.bpm}updDelay();showSwing();generate()}
 function stepGenre(d){const i=GENRE_ORDER.indexOf(S.genre);setGenre(GENRE_ORDER[(i+d+GENRE_ORDER.length)%GENRE_ORDER.length])}
@@ -814,13 +888,13 @@ function syncUI(){
   typesEl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-checked',b.dataset.v===S.mode));
   $('lenTxt').textContent=`${S.beats/4} mesure${S.beats>4?'s':''}`;
   $('seed').textContent='#'+String(S.seed).padStart(5,'0');
-  $('desc').textContent=`${GENRE_LABEL[S.genre]} · ${S.base?'Drop':MODE_NAME[S.mode]} · ${S.beats} temps`;
+  $('desc').textContent=`${GENRE_LABEL[S.genre]} · ${S.base?DERIVED_NAME[S.derived||'drop']:MODE_NAME[S.mode]} · ${S.beats} temps`;
   const pn=presetOf();$('kitName').textContent=pn?pn[0]:'Perso';
   const d=$('derive');d.hidden=!S.base;
-  if(S.base){$('dtag').textContent=`Drop ${S.dropName.toLowerCase()} · v${S.dropN}`;$('dtag').title=DROPS[S.dropFlavor].txt+` (sur ton pattern ${MODE_LABEL[S.baseMode]})`}
+  if(S.base){$('dtag').textContent=`${DERIVED_NAME[S.derived||'drop']} ${S.dropName.toLowerCase()} · v${S.dropN}`;$('dtag').title=DER()[S.dropFlavor].txt+` (sur ton pattern ${MODE_LABEL[S.baseMode]})`}
   $('back').disabled=!S.hist.length;
-  showSwing();showDens();
-  document.body.dataset.mode=S.base?'drop':S.mode;
+  showSwing();showDens();showDyn();
+  document.body.dataset.mode=modeKey(S);
 }
 
 /* ---------- onglet Style & kit ---------- */
@@ -928,7 +1002,7 @@ function render(){
   if(fresh){grid.classList.remove('fresh');void grid.offsetWidth;grid.classList.add('fresh');fresh=false;clearTimeout(render.t);render.t=setTimeout(()=>grid.classList.remove('fresh'),800)}
   syncUI();renderRack();touchRecent();renderDots();pushPattern();
 }
-function paint(c,v){c.style.setProperty('--v',v?Math.max(.3,v).toFixed(2):0)}
+function paint(c,v){c.style.setProperty('--v',v?(.22+.78*v).toFixed(2):0)} // la luminosité suit la vélocité
 function setNow(s){cols[nowStep]?.forEach(c=>c.classList.remove('now'));nowStep=s;
   if(s>=0){cols[s]?.forEach(c=>c.classList.add('now'));
     for(const id of IDS)if(S.kit.has(id)&&!S.mutes.has(id)&&S.pat[id]&&S.pat[id][s]>0)flashPad(S.map[id])}}
@@ -942,12 +1016,19 @@ grid.addEventListener('pointerdown',e=>{const c=e.target.closest('.c');if(!c||e.
 document.addEventListener('pointermove',e=>{if(!painting)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest&&el.closest('.c');
   if(c&&c.dataset.t===painting.row)setCell(c,painting.v)});
 document.addEventListener('pointerup',()=>{if(painting){painting=null;touchRecent();pushPattern()}});
+/* molette sur une note allumée : ajuste sa vélocité (sur une case vide, la liste défile normalement) */
+let wheelT;
+grid.addEventListener('wheel',e=>{const c=e.target.closest('.c');if(!c)return;
+  const id=c.dataset.t,s=+c.dataset.s,v=S.pat[id][s];if(!v)return;e.preventDefault();
+  const nv=Math.min(1,Math.max(.12,v+(e.deltaY<0?1:-1)*(e.shiftKey?.02:.07)));S.pat[id][s]=nv;paint(c,nv);
+  clearTimeout(wheelT);wheelT=setTimeout(()=>{audition(id,nv,s);touchRecent();pushPattern()},250)},{passive:false});
 
 /* ---------- boutons et clavier ---------- */
 const _generate=generate;
 generate=()=>{fresh=true;_generate()};
 $('gen').onclick=()=>{setTab('seq');generate()};
 $('drop').onclick=()=>{setTab('seq');fresh=true;tryDrop()};
+$('brk').onclick=()=>{setTab('seq');fresh=true;tryBreak()};
 $('midi').addEventListener('pointerdown',startMidiDrag);$('midi').addEventListener('dblclick',writeClip);
 $('orig').onclick=backToOriginal;
 $('back').onclick=back;
@@ -961,6 +1042,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('.vb'))return;
   if(k==='g'||k==='G'){setTab('seq');generate()}
   else if(k==='d'||k==='D'){setTab('seq');fresh=true;tryDrop()}
+  else if(k==='b'||k==='B'){setTab('seq');fresh=true;tryBreak()}
   else if(k==='w'||k==='W'||k==='e'||k==='E')writeClip();
   else if(k==='z'||k==='Z')back();
   else if(k==='1'||k==='2')setMode(MODES[+k-1][0]);
@@ -981,21 +1063,22 @@ function touchRecent(){pushState();const i=recent.findIndex(e=>e.id===S.curId);i
 function applyEntry(e){const h=e.snap;
   Object.assign(S,{pat:copyPat(h.pat),sig:{...h.sig},seed:h.seed,beats:h.beats,genre:h.genre,mode:h.mode,kit:new Set(h.kit),
     base:h.base&&copyPat(h.base),baseMode:h.baseMode,dropName:h.dropName,dropN:h.dropN,dropFlavor:h.dropFlavor,dropSeed:h.dropSeed,
-    swing:e.swing,locks:new Set(e.locks||[]),mutes:new Set(e.mutes||[])})}
+    derived:h.base?(h.derived||'drop'):'',swing:e.swing,locks:new Set(e.locks||[]),mutes:new Set(e.mutes||[])})}
 function restore(id){const e=recent.find(x=>x.id===id);if(!e||id===S.curId)return;pushHist();applyEntry(e);showSwing();S.curId=id;render()}
 function renderDots(){const el=$('hdots');el.innerHTML='';
-  recent.slice().reverse().forEach(e=>{const h=e.snap,b=document.createElement('button');b.className='hdot';b.dataset.m=h.base?'drop':h.mode;
-    b.title=`${GENRE_LABEL[h.genre]} · ${h.base?'drop '+h.dropName.toLowerCase():MODE_NAME[h.mode].toLowerCase()} · ${h.beats} temps`;
+  recent.slice().reverse().forEach(e=>{const h=e.snap,b=document.createElement('button');b.className='hdot';b.dataset.m=modeKey(h);
+    b.title=`${GENRE_LABEL[h.genre]} · ${h.base?derivedLabel(h):MODE_NAME[h.mode].toLowerCase()} · ${h.beats} temps`;
     b.setAttribute('aria-label',b.title);b.setAttribute('aria-pressed',e.id===S.curId);b.onclick=()=>restore(e.id);el.appendChild(b)})}
 
 /* ---------- état sauvegardé avec le set Live (par instance du plugin) ---------- */
-function exportState(){const e=entryOf();e.id=S.curId;return JSON.stringify({v:2,cur:ser(e),recent:recent.map(ser),map:S.map,mapV:MAP_V,swingClip:S.swingClip,dens:S.dens,listen:S.listen})}
+function exportState(){const e=entryOf();e.id=S.curId;return JSON.stringify({v:2,cur:ser(e),recent:recent.map(ser),map:S.map,mapV:MAP_V,swingClip:S.swingClip,dens:S.dens,dyn:S.dyn,listen:S.listen})}
 let stT;function pushState(){if(!JUCE)return;clearTimeout(stT);stT=setTimeout(()=>toMax('state',exportState()),250)}
 bindIn('restore',json=>{let o;try{o=JSON.parse(json)}catch(_){return}if(!o||o.v!==2||!o.cur)return; // un état d'avant la refonte est ignoré
   recent=(o.recent||[]).slice(0,5).map(des);recentN=Math.max(0,...recent.map(e=>e.id||0));
   if(o.map&&o.mapV===MAP_V){S.map={...DEFAULT_MAP,...o.map};store.set('map3',S.map)}
   S.swingClip=o.swingClip!==false;$('swClip').setAttribute('aria-checked',S.swingClip);
   if(o.dens!=null){S.dens=o.dens;showDens()}
+  if(o.dyn!=null){S.dyn=o.dyn;showDyn()}
   if(o.listen===false){S.listen=false;$('listen').setAttribute('aria-pressed','false');toMax('live',0)}
   const e=des(o.cur);applyEntry(e);S.curId=e.id;showSwing();render()});
 bindIn('dragdone',()=>flashWrite());

@@ -12,14 +12,14 @@
 :root{
   --bg:#151516; --panel:#1d1d1f; --tile:#2a2a2d; --tile-hi:#343438; --cell:#28282b; --cell-beat:#313135; --line:#2c2c30;
   --fg:#f1f0ee; --dim:#a4a4aa; --faint:#6f6f77;
-  --classic:#5fd4b8; --surprise:#a98cf5; --drop:#ff6b57; --hit:var(--classic);
+  --classic:#5fd4b8; --surprise:#a98cf5; --drop:#ff6b57; --break:#f5b94d; --hit:var(--classic);
   --sans:"Manrope","Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
   --mono:"Cascadia Mono",Consolas,ui-monospace,Menlo,monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;min-width:980px;min-height:620px;overflow:hidden;background:var(--bg);color:var(--fg);font:500 13px/1.35 var(--sans);-webkit-font-smoothing:antialiased;user-select:none}
-body[data-mode="surprise"]{--hit:var(--surprise)} body[data-mode="drop"]{--hit:var(--drop)}
+body[data-mode="surprise"]{--hit:var(--surprise)} body[data-mode="drop"]{--hit:var(--drop)} body[data-mode="break"]{--hit:var(--break)}
 button{font:inherit;color:inherit;margin:0;cursor:pointer}
 [hidden]{display:none!important}
 :focus-visible{outline:1px solid var(--fg);outline-offset:1px}
@@ -99,7 +99,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 .kitlink b{color:var(--fg);font-weight:600}
 .kitlink:hover{background:var(--tile-hi)}
 .derive{display:flex;align-items:center;gap:10px;font-size:12px;height:20px}
-.derive .tag{color:var(--drop);font-weight:700}
+.derive .tag{color:var(--hit);font-weight:700}
 .link{border:0;background:none;color:var(--dim);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--tile-hi);padding:0;font-size:12px}
 .link:hover{color:var(--fg)}
 
@@ -181,18 +181,22 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 
 /* barre d'actions */
 .act{display:flex;align-items:center;gap:12px;padding:0 14px}
-.gen{height:50px;width:200px;border:0;border-radius:10px;background:var(--hit);color:#101012;font-weight:800;font-size:15px;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .06s,background .25s}
+.gen{height:50px;width:180px;border:0;border-radius:10px;background:var(--hit);color:#101012;font-weight:800;font-size:15px;letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .06s,background .25s}
 .gen:hover{filter:brightness(1.08)}
 .gen:active{transform:scale(.98)}
 .gen kbd,.dropb kbd{font:500 10.5px var(--mono);border-radius:4px;padding:1px 6px;background:rgba(0,0,0,.18)}
-.dropb{height:50px;width:166px;border-radius:10px;border:0;background:color-mix(in oklab,var(--drop) 14%,var(--panel));color:var(--drop);font-weight:800;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:9px}
+.dropb,.brkb{height:50px;width:150px;border-radius:10px;border:0;background:color-mix(in oklab,var(--drop) 14%,var(--panel));color:var(--drop);font-weight:800;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:9px}
 .dropb kbd{background:color-mix(in oklab,var(--drop) 18%,transparent)}
 .dropb:hover{background:color-mix(in oklab,var(--drop) 24%,var(--panel))}
 .dropb:active{transform:scale(.98)}
+.brkb{background:color-mix(in oklab,var(--break) 14%,var(--panel));color:var(--break)}
+.brkb kbd{background:color-mix(in oklab,var(--break) 18%,transparent)}
+.brkb:hover{background:color-mix(in oklab,var(--break) 24%,var(--panel))}
+.brkb:active{transform:scale(.98)}
 .hist{display:grid;gap:6px;margin-left:4px}
 .hd{display:flex;gap:5px;align-items:center;min-height:18px}
 .hdot{--mc:var(--classic);width:18px;height:18px;border-radius:5px;border:0;padding:0;background:color-mix(in oklab,var(--mc) 30%,var(--panel))}
-.hdot[data-m="surprise"]{--mc:var(--surprise)} .hdot[data-m="drop"]{--mc:var(--drop)}
+.hdot[data-m="surprise"]{--mc:var(--surprise)} .hdot[data-m="drop"]{--mc:var(--drop)} .hdot[data-m="break"]{--mc:var(--break)}
 .hdot:hover{background:color-mix(in oklab,var(--mc) 65%,var(--panel))}
 .hdot[aria-pressed="true"]{background:var(--mc);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--mc)}
 .midi{margin-left:auto;height:50px;display:flex;align-items:center;gap:11px;padding:0 14px 0 10px;border-radius:10px;border:0;background:var(--panel);cursor:grab;text-align:left}
@@ -241,7 +245,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
             <button class="vb sel" id="lenBtn" aria-haspopup="listbox" aria-expanded="false"><span id="lenTxt"></span><svg viewBox="0 0 10 10"><path d="M2 3.5 5 6.5l3-3"/></svg></button>
             <div class="menu" id="lenMenu" role="listbox" hidden></div>
           </div>
-          <div id="fSwing"></div><div id="fDens"></div>
+          <div id="fSwing"></div><div id="fDens"></div><div id="fDyn"></div>
           <button class="kitlink" id="kitLink" title="Changer de kit">Kit · <b id="kitName"></b> ▾</button>
         </div>
         <div class="derive" id="derive" hidden><span class="tag" id="dtag"></span><button class="link" id="orig">revenir à l'original</button></div>
@@ -259,6 +263,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
   <footer class="act">
     <button class="gen" id="gen" title="Nouveau pattern (G)">Générer <kbd>G</kbd></button>
     <button class="dropb" id="drop" title="Garde la structure et la pousse en drop (D)">Tenter un drop <kbd>D</kbd></button>
+    <button class="brkb" id="brk" title="Garde la structure et la dépouille en breakdown (B)">Breakdown <kbd>B</kbd></button>
     <div class="hist"><span class="lab">Derniers beats</span><div class="hd" id="hdots"></div></div>
     <button class="ib" id="back" aria-label="Annuler" title="Annuler (Z)" disabled><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 5 3.5 9l4 4"/><path d="M3.5 9h8a5 5 0 0 1 0 10H9"/></svg></button>
     <button class="midi" id="midi" title="Maintiens et glisse vers une piste ou un slot de Live. Double-clic ou E : exporter un .mid"><span class="file">MIDI</span><span><b>Glisser le MIDI</b><small>vers Live · double-clic : exporter</small></span></button>

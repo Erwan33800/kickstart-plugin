@@ -47,7 +47,9 @@ function patternString(){
   return `${n}_${S.swing}_${S.swingClip?1:0}/`+rows.join('/')}
 let pushT;
 function pushPattern(){clearTimeout(pushT);pushT=setTimeout(()=>toMax('pattern',patternString()),20)}
-function clipName(){return `Kickstart · ${GENRE_LABEL[S.genre]} ${S.base?'drop '+S.dropName.toLowerCase():MODE_NAME[S.mode].toLowerCase()}`}
+const modeKey=h=>h.base?(h.derived==='break'?'break':'drop'):h.mode; // couleur d'accent : type, drop ou breakdown
+const derivedLabel=h=>`${DERIVED_NAME[h.derived||'drop'].toLowerCase()} ${h.dropName.toLowerCase()}`;
+function clipName(){return `Kickstart · ${GENRE_LABEL[S.genre]} ${S.base?derivedLabel(S):MODE_NAME[S.mode].toLowerCase()}`}
 /* Pas d'accès aux clips depuis un VST : on glisse le MIDI vers Live, ou on l'exporte en .mid */
 function writeClip(){
   if(!IN_PLUGIN){showMsg('Hors du plugin : export indisponible.',true);return}
@@ -111,7 +113,9 @@ const vSw=vbox($('fSwing'),'Swing',{min:50,max:75,get:()=>S.swing,set:v=>{S.swin
   tip:'Glisse ou molette. Double-clic : swing du style.',commit:()=>{pushPattern();touchRecent()}});
 const vDe=vbox($('fDens'),'Densité',{min:0,max:100,get:()=>Math.round(S.dens*100),set:v=>{S.dens=v/100},fmt:v=>String(v),reset:()=>60,
   tip:'Glisse ou molette. Régénère au relâchement. Double-clic : 60.',commit:()=>generate()});
-const showSwing=()=>vSw.show(),showDens=()=>vDe.show();
+const vDy=vbox($('fDyn'),'Dynamique',{min:0,max:100,get:()=>Math.round(S.dyn*100),set:v=>{S.dyn=v/100},fmt:v=>String(v),reset:()=>50,
+  tip:'Accents sur les temps et variations de vélocité. Régénère au relâchement. Double-clic : 50.',commit:()=>generate()});
+const showSwing=()=>vSw.show(),showDens=()=>vDe.show(),showDyn=()=>vDy.show();
 
 function setGenre(g){if(g===S.genre)return;S.genre=g;const d=GENRE_DEF[g];S.swing=d.swing;if(!IN_PLUGIN){S.bpm=d.bpm;$('bpm').textContent=S.bpm}updDelay();showSwing();generate()}
 function stepGenre(d){const i=GENRE_ORDER.indexOf(S.genre);setGenre(GENRE_ORDER[(i+d+GENRE_ORDER.length)%GENRE_ORDER.length])}
@@ -122,13 +126,13 @@ function syncUI(){
   typesEl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-checked',b.dataset.v===S.mode));
   $('lenTxt').textContent=`${S.beats/4} mesure${S.beats>4?'s':''}`;
   $('seed').textContent='#'+String(S.seed).padStart(5,'0');
-  $('desc').textContent=`${GENRE_LABEL[S.genre]} · ${S.base?'Drop':MODE_NAME[S.mode]} · ${S.beats} temps`;
+  $('desc').textContent=`${GENRE_LABEL[S.genre]} · ${S.base?DERIVED_NAME[S.derived||'drop']:MODE_NAME[S.mode]} · ${S.beats} temps`;
   const pn=presetOf();$('kitName').textContent=pn?pn[0]:'Perso';
   const d=$('derive');d.hidden=!S.base;
-  if(S.base){$('dtag').textContent=`Drop ${S.dropName.toLowerCase()} · v${S.dropN}`;$('dtag').title=DROPS[S.dropFlavor].txt+` (sur ton pattern ${MODE_LABEL[S.baseMode]})`}
+  if(S.base){$('dtag').textContent=`${DERIVED_NAME[S.derived||'drop']} ${S.dropName.toLowerCase()} · v${S.dropN}`;$('dtag').title=DER()[S.dropFlavor].txt+` (sur ton pattern ${MODE_LABEL[S.baseMode]})`}
   $('back').disabled=!S.hist.length;
-  showSwing();showDens();
-  document.body.dataset.mode=S.base?'drop':S.mode;
+  showSwing();showDens();showDyn();
+  document.body.dataset.mode=modeKey(S);
 }
 
 /* ---------- onglet Style & kit ---------- */
@@ -236,7 +240,7 @@ function render(){
   if(fresh){grid.classList.remove('fresh');void grid.offsetWidth;grid.classList.add('fresh');fresh=false;clearTimeout(render.t);render.t=setTimeout(()=>grid.classList.remove('fresh'),800)}
   syncUI();renderRack();touchRecent();renderDots();pushPattern();
 }
-function paint(c,v){c.style.setProperty('--v',v?Math.max(.3,v).toFixed(2):0)}
+function paint(c,v){c.style.setProperty('--v',v?(.22+.78*v).toFixed(2):0)} // la luminosité suit la vélocité
 function setNow(s){cols[nowStep]?.forEach(c=>c.classList.remove('now'));nowStep=s;
   if(s>=0){cols[s]?.forEach(c=>c.classList.add('now'));
     for(const id of IDS)if(S.kit.has(id)&&!S.mutes.has(id)&&S.pat[id]&&S.pat[id][s]>0)flashPad(S.map[id])}}
@@ -250,12 +254,19 @@ grid.addEventListener('pointerdown',e=>{const c=e.target.closest('.c');if(!c||e.
 document.addEventListener('pointermove',e=>{if(!painting)return;const el=document.elementFromPoint(e.clientX,e.clientY),c=el&&el.closest&&el.closest('.c');
   if(c&&c.dataset.t===painting.row)setCell(c,painting.v)});
 document.addEventListener('pointerup',()=>{if(painting){painting=null;touchRecent();pushPattern()}});
+/* molette sur une note allumée : ajuste sa vélocité (sur une case vide, la liste défile normalement) */
+let wheelT;
+grid.addEventListener('wheel',e=>{const c=e.target.closest('.c');if(!c)return;
+  const id=c.dataset.t,s=+c.dataset.s,v=S.pat[id][s];if(!v)return;e.preventDefault();
+  const nv=Math.min(1,Math.max(.12,v+(e.deltaY<0?1:-1)*(e.shiftKey?.02:.07)));S.pat[id][s]=nv;paint(c,nv);
+  clearTimeout(wheelT);wheelT=setTimeout(()=>{audition(id,nv,s);touchRecent();pushPattern()},250)},{passive:false});
 
 /* ---------- boutons et clavier ---------- */
 const _generate=generate;
 generate=()=>{fresh=true;_generate()};
 $('gen').onclick=()=>{setTab('seq');generate()};
 $('drop').onclick=()=>{setTab('seq');fresh=true;tryDrop()};
+$('brk').onclick=()=>{setTab('seq');fresh=true;tryBreak()};
 $('midi').addEventListener('pointerdown',startMidiDrag);$('midi').addEventListener('dblclick',writeClip);
 $('orig').onclick=backToOriginal;
 $('back').onclick=back;
@@ -269,6 +280,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('.vb'))return;
   if(k==='g'||k==='G'){setTab('seq');generate()}
   else if(k==='d'||k==='D'){setTab('seq');fresh=true;tryDrop()}
+  else if(k==='b'||k==='B'){setTab('seq');fresh=true;tryBreak()}
   else if(k==='w'||k==='W'||k==='e'||k==='E')writeClip();
   else if(k==='z'||k==='Z')back();
   else if(k==='1'||k==='2')setMode(MODES[+k-1][0]);
@@ -289,21 +301,22 @@ function touchRecent(){pushState();const i=recent.findIndex(e=>e.id===S.curId);i
 function applyEntry(e){const h=e.snap;
   Object.assign(S,{pat:copyPat(h.pat),sig:{...h.sig},seed:h.seed,beats:h.beats,genre:h.genre,mode:h.mode,kit:new Set(h.kit),
     base:h.base&&copyPat(h.base),baseMode:h.baseMode,dropName:h.dropName,dropN:h.dropN,dropFlavor:h.dropFlavor,dropSeed:h.dropSeed,
-    swing:e.swing,locks:new Set(e.locks||[]),mutes:new Set(e.mutes||[])})}
+    derived:h.base?(h.derived||'drop'):'',swing:e.swing,locks:new Set(e.locks||[]),mutes:new Set(e.mutes||[])})}
 function restore(id){const e=recent.find(x=>x.id===id);if(!e||id===S.curId)return;pushHist();applyEntry(e);showSwing();S.curId=id;render()}
 function renderDots(){const el=$('hdots');el.innerHTML='';
-  recent.slice().reverse().forEach(e=>{const h=e.snap,b=document.createElement('button');b.className='hdot';b.dataset.m=h.base?'drop':h.mode;
-    b.title=`${GENRE_LABEL[h.genre]} · ${h.base?'drop '+h.dropName.toLowerCase():MODE_NAME[h.mode].toLowerCase()} · ${h.beats} temps`;
+  recent.slice().reverse().forEach(e=>{const h=e.snap,b=document.createElement('button');b.className='hdot';b.dataset.m=modeKey(h);
+    b.title=`${GENRE_LABEL[h.genre]} · ${h.base?derivedLabel(h):MODE_NAME[h.mode].toLowerCase()} · ${h.beats} temps`;
     b.setAttribute('aria-label',b.title);b.setAttribute('aria-pressed',e.id===S.curId);b.onclick=()=>restore(e.id);el.appendChild(b)})}
 
 /* ---------- état sauvegardé avec le set Live (par instance du plugin) ---------- */
-function exportState(){const e=entryOf();e.id=S.curId;return JSON.stringify({v:2,cur:ser(e),recent:recent.map(ser),map:S.map,mapV:MAP_V,swingClip:S.swingClip,dens:S.dens,listen:S.listen})}
+function exportState(){const e=entryOf();e.id=S.curId;return JSON.stringify({v:2,cur:ser(e),recent:recent.map(ser),map:S.map,mapV:MAP_V,swingClip:S.swingClip,dens:S.dens,dyn:S.dyn,listen:S.listen})}
 let stT;function pushState(){if(!JUCE)return;clearTimeout(stT);stT=setTimeout(()=>toMax('state',exportState()),250)}
 bindIn('restore',json=>{let o;try{o=JSON.parse(json)}catch(_){return}if(!o||o.v!==2||!o.cur)return; // un état d'avant la refonte est ignoré
   recent=(o.recent||[]).slice(0,5).map(des);recentN=Math.max(0,...recent.map(e=>e.id||0));
   if(o.map&&o.mapV===MAP_V){S.map={...DEFAULT_MAP,...o.map};store.set('map3',S.map)}
   S.swingClip=o.swingClip!==false;$('swClip').setAttribute('aria-checked',S.swingClip);
   if(o.dens!=null){S.dens=o.dens;showDens()}
+  if(o.dyn!=null){S.dyn=o.dyn;showDyn()}
   if(o.listen===false){S.listen=false;$('listen').setAttribute('aria-pressed','false');toMax('live',0)}
   const e=des(o.cur);applyEntry(e);S.curId=e.id;showSwing();render()});
 bindIn('dragdone',()=>flashWrite());
