@@ -19,6 +19,16 @@ const noteName=p=>NOTE_N[p%12]+(Math.floor(p/12)-2);
    · C#2 tambourin · D2 shaker · D#2 ride. Banque 2 (E2 à G3) : crash, rimshot, snap, clave, woodblock, hat pédale. */
 const DEFAULT_MAP={k:36,rim:37,sn:38,cp:39,pl:40,pm:41,ch:42,ph:43,tl:44,tm:45,oh:46,th:47,cb:48,tamb:49,shk:50,ride:51,
   cr:52,rs:53,snap:54,clv:55,wb:56,hp:57};
+/* Racks prêts à l'emploi : une note par instrument. « silent » : instruments sans sample dans ce kit, rangés sur des notes
+   sans pad pour ne pas jouer un mauvais son. Pour en ajouter un, copier une entrée et changer les notes (les 22 ids). */
+const RACK_PRESETS=[
+  {name:'Par défaut',desc:'Disposition des kits Ableton, banque 2 pour les derniers venus',map:DEFAULT_MAP,silent:[]},
+  {name:'909 Core Kit',desc:'Core Kit 909 d\'Ableton : kick C1, rim C#1, snare D1, clap D#1, hats F#1 et A#1, toms G#1 à B1, crash C2, ride D2',
+   map:{k:36,rim:37,sn:38,cp:39,ch:42,tl:44,tm:45,oh:46,th:47,cr:48,ride:50,
+        snap:52,rs:53,cb:54,shk:55,tamb:56,hp:57,clv:58,wb:59,pl:60,pm:61,ph:62},
+   silent:['snap','rs','cb','shk','tamb','hp','clv','wb','pl','pm','ph']}];
+const sameMap=m=>IDS.every(id=>S.map[id]===m[id]);
+const rackPresetName=()=>(RACK_PRESETS.find(p=>sameMap({...DEFAULT_MAP,...p.map}))||{name:'Perso'}).name;
 const TRACK=Object.fromEntries(TRACKS.map(t=>[t.id,t]));
 const PAD_LO=36;
 const BANKS=[['C1 – D#2',0],['E2 – G3',1]];
@@ -89,7 +99,7 @@ function buildLen(){const m=$('lenMenu');m.innerHTML='';
   [1,2,3,4].forEach(n=>{const b=document.createElement('button');b.className='mi';b.setAttribute('role','option');b.setAttribute('aria-checked',n*4===S.beats);
     b.innerHTML=`${n} mesure${n>1?'s':''}<small>${n*4} temps</small>`;b.onclick=e=>{e.stopPropagation();closeLen();setBeats(n*4)};m.appendChild(b)})}
 function closeLen(){$('lenMenu').hidden=true;$('lenBtn').setAttribute('aria-expanded','false')}
-$('lenBtn').onclick=e=>{e.stopPropagation();const open=$('lenMenu').hidden;if(open){closePick();buildLen();$('lenMenu').hidden=false}else closeLen();$('lenBtn').setAttribute('aria-expanded',open)};
+$('lenBtn').onclick=e=>{e.stopPropagation();const open=$('lenMenu').hidden;if(open){closePick();closeRack();buildLen();$('lenMenu').hidden=false}else closeLen();$('lenBtn').setAttribute('aria-expanded',open)};
 /* Boîte de valeur : glisser, molette, flèches ; double-clic remet la valeur par défaut ; « commit » au relâchement */
 function vbox(host,label,{min,max,get,set,fmt,reset,tip,commit}){
   const f=document.createElement('div');f.className='fld';
@@ -138,7 +148,7 @@ function syncUI(){
 /* ---------- onglet Style & kit ---------- */
 GENRE_ORDER.forEach(g=>{const b=document.createElement('button');b.className='tile sty';b.dataset.v=g;b.setAttribute('role','radio');
   b.title=GENRE_DEF[g].desc;b.innerHTML=`<small>${GENRE_DEF[g].bpm} bpm</small><b>${GENRE_LABEL[g]}</b>`;b.onclick=()=>setGenre(g);$('styles').appendChild(b)});
-function setTab(t){closeLen();closePick();document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+function setTab(t){closeLen();closePick();closeRack();document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
   $('vSeq').hidden=t!=='seq';$('vStyle').hidden=t!=='style';if(t==='style')renderKit()}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $('kitLink').onclick=()=>setTab('style');$('beatbar').onclick=()=>setTab('style');
@@ -159,6 +169,7 @@ function pel(id){const b=document.createElement('span');b.className='pel';b.data
 function renderRack(){
   const pg=$('pgrid');pg.innerHTML='';
   $('banks').querySelectorAll('button').forEach(x=>x.setAttribute('aria-checked',+x.dataset.b===S.bank));
+  $('rackTxt').textContent=rackPresetName();
   for(let i=0;i<16;i++){const n=PAD_LO+S.bank*16+i,els=TRACKS.filter(t=>S.map[t.id]===n&&S.kit.has(t.id)).map(t=>t.id);
     const p=document.createElement('div');p.dataset.n=n;p.className='mp'+(els.length?'':' free');
     p.innerHTML=`<small>${noteName(n)}</small><div class="slot"></div>`;
@@ -178,14 +189,14 @@ function moveEl(id,n){
   if(added){S.kit.add(id);rebuildKit()}else render()}
 function closePick(){document.querySelectorAll('.pick').forEach(m=>m.remove())}
 function openPick(p,n,i){
-  const had=p.querySelector('.pick');closePick();closeLen();if(had)return;
+  const had=p.querySelector('.pick');closePick();closeLen();closeRack();if(had)return;
   const m=document.createElement('div');m.className='menu pick'+(i%8>=5?' r':'');m.onclick=e=>e.stopPropagation();
   TRACKS.forEach(t=>{const b=document.createElement('button');b.className='mi';const inKit=S.kit.has(t.id);
     b.setAttribute('aria-checked',S.map[t.id]===n&&inKit);if(!inKit)b.style.opacity='.6';
     b.innerHTML=`<span style="color:${t.c}">${t.name}</span><small>${inKit?noteName(S.map[t.id]):'hors kit'}</small>`;
     b.onclick=()=>{closePick();moveEl(t.id,n)};m.appendChild(b)});
   p.appendChild(m)}
-document.addEventListener('click',()=>{closePick();closeLen()});
+document.addEventListener('click',()=>{closePick();closeLen();closeRack()});
 /* Glisser un instrument d'un pad à l'autre (événements pointeur : pas de drag HTML5, qui gênerait le glisser du MIDI) */
 function startDrag(e,src){
   if(e.button!==0)return;e.preventDefault();e.stopPropagation();const id=src.dataset.id;let moved=false,ghost=null,over=null;const x0=e.clientX,y0=e.clientY;
@@ -200,7 +211,18 @@ function startDrag(e,src){
     over&&over.classList.remove('over');
     if(over)moveEl(id,+over.dataset.n);else renderRack()};
   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up)}
-$('mapReset').onclick=()=>{S.map={...DEFAULT_MAP};store.set('map3',S.map);showMsg('Rack remis par défaut');render()};
+/* menu des presets de Rack */
+function closeRack(){$('rackMenu').hidden=true;$('rackBtn').setAttribute('aria-expanded','false')}
+function applyRack(p){
+  S.map={...DEFAULT_MAP,...p.map};store.set('map3',S.map);S.bank=0;
+  const miss=(p.silent||[]).filter(id=>S.kit.has(id)).map(id=>NAME[id]);
+  showMsg(miss.length?`${p.name} appliqué · pas de sample pour : ${miss.join(', ')}`:`${p.name} appliqué`);render()}
+$('rackBtn').onclick=e=>{e.stopPropagation();const open=$('rackMenu').hidden;closePick();closeLen();
+  if(open){const m=$('rackMenu');m.innerHTML='';const cur=rackPresetName();
+    RACK_PRESETS.forEach(p=>{const b=document.createElement('button');b.className='mi';b.setAttribute('role','option');b.setAttribute('aria-checked',p.name===cur);b.title=p.desc;
+      b.innerHTML=`${p.name}<small>${p.silent.length?p.silent.length+' sans sample':'tous les sons'}</small>`;b.onclick=ev=>{ev.stopPropagation();closeRack();applyRack(p)};m.appendChild(b)});
+    m.hidden=false}else closeRack();
+  $('rackBtn').setAttribute('aria-expanded',open)};
 $('swClip').onclick=()=>{S.swingClip=!S.swingClip;store.set('swingClip',S.swingClip);$('swClip').setAttribute('aria-checked',S.swingClip);pushPattern()};
 
 /* ---------- séquenceur ---------- */
@@ -276,7 +298,7 @@ $('listen').onclick=()=>{S.listen=!S.listen;$('listen').setAttribute('aria-press
 function back(){const h=S.hist.pop();if(!h)return;S.curId=null;Object.assign(S,h);showSwing();render()}
 document.addEventListener('keydown',e=>{
   if(e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
-  if(k==='Escape'){closePick();closeLen();return}
+  if(k==='Escape'){closePick();closeLen();closeRack();return}
   if(e.target.closest&&e.target.closest('.vb'))return;
   if(k==='g'||k==='G'){setTab('seq');generate()}
   else if(k==='d'||k==='D'){setTab('seq');fresh=true;tryDrop()}

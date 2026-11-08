@@ -149,7 +149,9 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 /* rack */
 .rackv{display:grid;gap:9px}
 .rackh{display:flex;align-items:center;gap:12px}
-.rackh .link{margin-left:auto}
+.rackh .fld{margin-left:auto}
+#rackBtn{min-width:150px}
+#rackMenu{left:auto;right:0;min-width:260px}
 .pgrid{display:grid;grid-template-columns:repeat(8,1fr);grid-auto-rows:58px;gap:6px}
 .mp{border-radius:8px;background:var(--tile);display:flex;flex-direction:column;justify-content:space-between;padding:6px 10px 8px;min-width:0;min-height:0;position:relative;cursor:pointer;transition:background .1s}
 .mp small{font:500 10.5px var(--mono);color:var(--dim)}
@@ -235,7 +237,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
   <div class="mid"><section class="seq" aria-label="Panneau principal">
     <div class="view" id="vSeq">
       <div class="panel"><div class="rackv">
-        <div class="rackh"><span class="lab">Rack</span><div class="segc" id="banks" role="radiogroup" aria-label="Banque de pads"></div><span class="lab">Glisse un instrument sur un pad, ou clique ⌄ pour le choisir</span><button class="link" id="mapReset">Ordre par défaut</button><button class="tog" id="swClip" role="switch" aria-checked="true" title="Coupé : grille droite, à swinguer avec un Groove de Live"><i></i>Swing écrit dans le clip</button></div>
+        <div class="rackh"><span class="lab">Rack</span><div class="segc" id="banks" role="radiogroup" aria-label="Banque de pads"></div><span class="lab">Glisse un instrument sur un pad, ou clique ⌄ pour le choisir</span><div class="fld" id="fRack"><span class="lab">Preset</span><button class="vb sel" id="rackBtn" aria-haspopup="listbox" aria-expanded="false"><span id="rackTxt"></span><svg viewBox="0 0 10 10"><path d="M2 3.5 5 6.5l3-3"/></svg></button><div class="menu" id="rackMenu" role="listbox" hidden></div></div><button class="tog" id="swClip" role="switch" aria-checked="true" title="Coupé : grille droite, à swinguer avec un Groove de Live"><i></i>Swing écrit dans le clip</button></div>
         <div class="pgrid" id="pgrid"></div>
       </div></div>
       <div class="panel"><div class="seqv">

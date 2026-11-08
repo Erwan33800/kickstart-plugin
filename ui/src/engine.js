@@ -221,34 +221,57 @@ function extras(b,c){
   if(M==='classic'){[...c.pick(CONGA_LH)].forEach((ch,s)=>{if(ch!=='.'&&c.maybe(.9))b[ch==='l'?'pl':'ph'][s]=ch==='l'?.6:.55})}
   else if(M==='surprise'){each(euclid(5,16,c.int(16)),s=>{b[c.r()<.4?'pl':'ph'][s]=.55});if(c.maybe(.5))b.ph[c.pick([7,15])]=.35}
   else each(euclid(7,16,c.int(16)),s=>{b[s%4===0?'pl':'ph'][s]=s%4===0?.65:.55});
-  // toms : peu dans le groove, surtout dans les fills
-  if(M==='surprise'&&c.maybe(.35))b[c.pick(['th','tm','tl'])][c.pick([7,14])]=.5;
-  if(dub&&M==='classic'&&c.maybe(.25))b.tl[15]=.45;
-  // les derniers venus sont tirés après les autres : les motifs précédents ne changent pas. Le crash est posé dans build().
-  const afro=G==='afro',loose=G==='dub'||G==='dubstep'||G==='breaks',back=GENRE_DEF[G].back;
-  // snap : double le clap en house, afro et garage
-  if(G==='house'||afro||G==='garage'){
-    if(M==='classic'){if(c.maybe(.45))set(b,'snap',back,.55)}
-    else if(M==='surprise'){if(c.maybe(.5))b.snap[c.pick([7,15])]=.5}
-    else set(b,'snap',back,.7)}
-  else if(c.maybe(.1))b.snap[c.pick(back)]=.4;
-  // rimshot : surtout dans les styles à delay
+  // Les instruments suivants sont tirés après les autres : les motifs précédents ne changent pas. Le crash est posé dans build().
+  // Règle : tout instrument du kit joue une vraie partie, dans tous les styles. La présence ne dépend pas de la densité
+  // (la densité ne règle que le nombre de notes en plus). Trois familles de styles : four (house, techno, afro, dub techno),
+  // half (dub, dubstep : tempo moitié) et broken (garage, breakbeat, drum & bass).
+  const fam=G==='dub'||G==='dubstep'?'half':(G==='garage'||G==='breaks'||G==='dnb')?'broken':'four';
+  const afro=G==='afro',back=GENRE_DEF[G].back,loose=fam==='half'||G==='breaks';
+  // toms : une partie dans le groove, en plus des fills de fin de boucle. Un seul tom dans le kit prend les trois rôles (FALLBACK).
+  const TOMG={
+    four:[[['tm',[11]],['tl',[14]]],[['th',[7]],['tl',[15]]],[['tm',[6,14]]],[['tl',[3,10]],['th',[15]]]],
+    half:[[['tl',[10,14]]],[['tm',[11]],['tl',[14]]],[['tl',[6]],['tm',[15]]]],
+    broken:[[['th',[7]],['tm',[11]],['tl',[13]]],[['tm',[3,10]],['tl',[14]]],[['th',[2,9]],['tl',[11]]]]};
+  if(M==='surprise')each(euclid(5,16,c.int(16)),s=>b[c.pick(['th','tm','tl'])][s]=.5);
+  else c.pick(TOMG[fam]).forEach(([id,ss])=>set(b,id,ss,M==='drop'?.65:.55));
+  // snap : double le backbeat, avec un coup décalé en surprenant
+  set(b,'snap',back,M==='drop'?.7:.55);
+  if(M==='surprise')b.snap[c.pick([7,15])]=.4;
+  // rimshot : dans les styles à delay, et ailleurs en contretemps
   if(dub){
-    if(M==='classic'){if(c.maybe(.5))set(b,'rs',c.pick([[14],[6,14],[11]]),.5)}
+    if(M==='classic')set(b,'rs',c.pick([[14],[6,14],[11]]),.5);
     else if(M==='surprise')each(euclid(3,8,c.int(8)),s=>b.rs[s]=.5);
     else set(b,'rs',[4,12],.55)}
-  else if(c.maybe(.15))b.rs[c.pick([7,15])]=.4;
-  // hat pédale : petits coups entre les hats en dub, dubstep et breakbeat
-  if(loose){
-    if(M==='classic'){for(let s=1;s<16;s+=2)if(c.maybe(.4))b.hp[s]=.3}
-    else if(M==='surprise')each(euclid(5,16,c.int(16)),s=>b.hp[s]=.32);
-    else for(let s=1;s<16;s+=2)b.hp[s]=.35}
-  else if(c.maybe(.15))b.hp[c.pick([7,15])]=.3;
-  // clave (3-2 ou rumba) et woodblock : l'afro house
+  else if(M==='surprise')each(euclid(3,8,c.int(8)),s=>b.rs[s]=.5);
+  else set(b,'rs',c.pick([[7],[15],[3,11],[7,15]]),.5);
+  // hat pédale : petits coups entre les hats, plus fournis en dub, dubstep et breakbeat
+  if(M==='classic'){for(let s=1;s<16;s+=2)if(c.maybe(loose?.4:.25))b.hp[s]=.3}
+  else if(M==='surprise')each(euclid(loose?5:3,16,c.int(16)),s=>b.hp[s]=.32);
+  else for(let s=1;s<16;s+=2)if(loose||c.maybe(.5))b.hp[s]=.35;
+  if(!b.hp.some(Boolean))b.hp[c.pick([3,7,11,15])]=.3;
+  // clave : 3-2 ou rumba en afro house, motif euclidien discret ailleurs
   if(afro)set(b,'clv',M==='surprise'?[0,3,7,10,12]:[0,3,6,10,12],M==='drop'?.7:.6);
-  else if(M==='surprise'&&c.maybe(.2))each(euclid(5,16,c.int(16)),s=>b.clv[s]=.4);
-  if(afro){if(c.maybe(.6))set(b,'wb',c.pick([[2,5,9,14],[5,9,13],[2,10]]),.45)}
-  else if(c.maybe(.1))b.wb[c.pick([5,13])]=.4;
+  else if(fam==='half')set(b,'clv',c.pick([[10],[6,14],[3,11]]),.5);
+  else each(euclid(M==='surprise'?7:5,16,c.int(16)),s=>b.clv[s]=.45);
+  // woodblock
+  if(afro)set(b,'wb',c.pick([[2,5,9,14],[5,9,13],[2,10]]),.45);
+  else if(fam==='half')set(b,'wb',c.pick([[14],[6],[10]]),.45);
+  else if(M==='surprise')each(euclid(3,8,c.int(8)),s=>b.wb[s]=.42);
+  else set(b,'wb',c.pick([[5,13],[2,10],[6,14],[3,11]]),.45);
+  // filet de sécurité : les instruments de base que la recette du style n'a pas utilisés reçoivent une partie
+  // (une snare en techno, un clap en dub, un hat ouvert en drum & bass...)
+  const ens=(id,fn)=>{if(!b[id].some(Boolean))fn()};
+  ens('sn',()=>set(b,'sn',fam==='half'?[8]:c.pick([[4,12],[12],[7,15]]),.5));
+  ens('cp',()=>set(b,'cp',back,.6));
+  ens('rim',()=>set(b,'rim',c.pick([[3,11],[7,15],[11]]),.5));
+  ens('ch',()=>{for(let s=0;s<16;s+=2)b.ch[s]=s%4===2?.55:.4});
+  ens('oh',()=>b.oh[c.pick(GENRE_DEF[G].doh)]=.55);
+  ens('pm',()=>each(euclid(3,8,c.int(8)),s=>b.pm[s]=.42));
+  ens('pl',()=>set(b,'pl',c.pick([[3,10],[6],[11]]),.55));
+  ens('ph',()=>set(b,'ph',c.pick([[2,13],[7],[15]]),.5));
+  ens('th',()=>b.th[c.pick([2,7,9,15])]=.45);
+  ens('tm',()=>b.tm[c.pick([6,10,11,14])]=.45);
+  ens('tl',()=>b.tl[c.pick([3,10,13,14])]=.5);
   return b}
 
 function mutate(b,c){const n=1+c.int(2);
@@ -299,7 +322,7 @@ function build(newSeed){
   const A=extras(R[S.genre][S.mode](c),c),B=mutate(clone(A),c),nb=S.beats/4;
   const order={1:[A],2:[A,B],3:[A,A,B],4:[A,B,A,B]}[nb].map(clone);
   if(nb>1)fill(order[nb-1],c);
-  if(c.maybe(.5)||S.mode==='drop')order[0].cr[0]=.85; // crash sur le premier temps de la boucle
+  if(S.mode==='drop'||c.r()<.9)order[0].cr[0]=.85; // crash sur le premier temps de la boucle
   humanize(order,mulberry(S.seed*131+17),S.dyn);
   const raw=Object.fromEntries(IDS.map(id=>[id,order.flatMap(bar=>bar[id])]));
   // projection sur le kit
