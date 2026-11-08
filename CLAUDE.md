@@ -44,6 +44,8 @@ Raccourcis : G générer, D drop, Z annuler, 1/2/3 type, ← → style, E export
 
 Un VST ne peut pas écrire directement dans un clip de Live : d'où le glisser-déposer d'un fichier MIDI.
 
+**Décision (nov. 2026) : on reste sur deux pistes.** Erwan aurait préféré un seul emplacement sur la piste du Drum Rack. Impossible avec un VST3 : un effet VST reçoit de l'audio, un instrument ne sort du MIDI que vers une autre piste, et une piste n'a qu'un instrument. Pistes écartées pour l'instant : device Max for Live devant le Drum Rack (retour du problème `jweb`) et chargement du VST3 dans Max via `vst~` (synchro avec la lecture et fenêtre non éprouvées, prototype nécessaire). Le glisser-déposer du MIDI permet déjà de se passer de l'écoute en direct.
+
 **Notes par défaut** (16 pads, convention des kits Ableton) :
 
 ```
@@ -54,6 +56,44 @@ C1  Kick        C#1 Rim         D1  Snare       D#1 Clap
 ```
 
 Les toms utilisent une seule entrée (`tom`, note grave) et des décalages `TOM_OFF=[3,3,1,0]` selon la position dans le temps, pour des fills descendants. La version du mapping est `MAP_V=2` : un état sauvegardé avec un ancien mapping est ignoré au chargement.
+
+## Refonte de l'interface (maquette validée, pas encore réalisée)
+
+L'interface actuelle (bande de 1180 x 196 px) est jugée trop dense, austère, avec des fonctions cachées. Une maquette interactive a été validée avec Erwan : **`ui/maquette/kickstart-maquette.html`** (HTML autonome, à ouvrir dans un navigateur). Le dossier est dans `.gitignore` : la maquette n'est pas versionnée et n'existe que sur le poste d'Erwan (si elle manque, la demander ; la description ci-dessous suffit à la reconstituer). C'est la référence visuelle et fonctionnelle. Son moteur de génération est un simple substitut pour avoir des motifs plausibles : ne pas le porter, garder `engine.js`.
+
+Inspiration : le plugin ADSR Drum Machine (look plat, tuiles arrondies, nom d'instrument coloré, un seul accent). Ambiance voulue : instrument hardware.
+
+**Fenêtre** : 1120 x 740 px (à régler dans `PluginEditor.cpp`, y compris `setResizeLimits`, aujourd'hui 980-1800 x 180-420).
+
+**Structure**
+- **En-tête** : logo, barre du beat (style · type · longueur · seed, cliquable : ouvre « Style & kit »), onglets **Pattern** et **Style & kit**, tempo, lecture (hors Live), écoute dans le Drum Rack.
+- **Onglet Pattern** : Rack en haut, séquenceur en bas.
+  - Rack : 2 **banques** de 16 pads (C1-D#2 et E2-G3), en 2 rangées de 8 dans l'ordre de lecture. Chaque pad : note en petit en haut à gauche, instrument coloré en bas à gauche. Seuls les instruments **du kit** s'affichent ; un pad dont l'instrument n'est pas dans le kit est « vide » (l'instrument garde sa note en mémoire). Glisser un instrument sur un pad de la même banque l'échange avec l'occupant (événements pointeur, pas de drag HTML5, pour ne pas gêner le glisser-déposer du MIDI). Le chevron ⌄ d'un pad ouvre la liste des 22 instruments : le choisi vient sur ce pad, l'occupant prend sa place, et il est ajouté au kit s'il n'y était pas (ce qui régénère). Les pads s'allument à la lecture, et survoler le nom d'une piste entoure son pad.
+  - Bande de réglages : **Type** (Classique ou Surprenant seulement, touches 1/2), **Longueur** (liste déroulante de 1 à 4 mesures), **Swing** et **Densité** (boîtes de valeur : glisser, molette, flèches ; double-clic remet le swing du style / 60 ; la densité régénère au relâchement), lien « Kit ».
+  - Le drop n'est plus un type : il a son bouton. Quand il est actif, une ligne « Drop … · vN · revenir à l'original » apparaît sous la bande.
+  - Séquenceur : pistes avec lock/mute toujours visibles, nom coloré, défilement vertical si le kit dépasse la hauteur.
+- **Onglet Style & kit** : les 9 styles en une rangée de tuiles (un clic génère), puis kits prêts à l'emploi et instruments par groupe (Fondations, Métaux, Secoués, Bois, Peaux).
+- **Barre du bas** : Générer (G, bouton plein), Tenter un drop (D), 5 derniers beats, annuler (Z), glisser le MIDI vers Live (double-clic ou E : export .mid).
+
+**Visuel** : thème sombre plat, tuiles de même langage partout (styles, kits, pads), tuile active remplie de l'accent du type (classique `#5fd4b8`, surprenant `#a98cf5`, drop `#ff6b57`), police Manrope (à **intégrer en base64** dans la page : le WebView est hors ligne). Couleurs par instrument : voir `TRK` dans la maquette.
+
+**22 instruments** (14 aujourd'hui, 8 de plus : crash, rimshot, snap, hat pédale, clave, woodblock, et les toms éclatés en trois). Notes par défaut :
+
+| Groupe | Instruments (note) |
+| --- | --- |
+| Fondations | Kick C1, Snare D1, Clap D#1, Snap F#2, Rim C#1, Rimshot F2 |
+| Métaux | Hat fermé F#1, Hat pédale A2, Hat ouvert A#1, Ride D#2, Crash E2, Cowbell C2 |
+| Secoués | Shaker D2, Tambourin C#2 |
+| Bois | Clave G2, Woodblock G#2 |
+| Peaux | Conga grave E1, médium F1, aiguë G1 ; Tom aigu B1, médium A1, grave G#1 |
+
+La banque 1 (C1-D#2) garde exactement les 16 pads d'avant (les toms y occupent G#1, A1, B1) : les kits Ableton d'Erwan ne bougent pas. Les nouveaux sont dans la banque 2. Kits de la maquette : Essentiel, Groove house, Latin (avec clave et woodblock), Dub (avec rimshot, hat pédale, crash), Breaks (avec les 3 toms), Tout.
+
+**À faire à la réalisation** (rien de cela n'est encore dans `ui/src/` ni `Source/`) :
+- `engine.js` : remplacer `tom` + `TOM_OFF` par trois ids (aigu, médium, grave, fills descendants), ajouter les 6 nouveaux instruments à `TRACKS`, à `DEFAULT_MAP`, à `FALLBACK`, aux `PRESETS` et aux recettes des styles (crash au premier temps et dans le drop, snap qui double le clap en house/afro, clave en afro, hat pédale en dub/dubstep/breaks, rimshot en dub). Ajouter le groupe « Bois ».
+- `plugin-ui.js` : `patternString()` n'a plus de cas particulier pour les toms. Ajouter les banques du Rack. Incrémenter **`MAP_V`** (un état sauvegardé avec l'ancien mapping est alors ignoré).
+- Retirer le type « Drop » de `MODES` (le drop reste un état dérivé, `S.base`).
+- Piège rencontré dans la maquette : dans une grille CSS dont une rangée est masquée (`hidden`), les blocs suivants glissent d'une rangée et se retrouvent écrasés. Donner à chaque bloc un `grid-row` explicite.
 
 ## Architecture
 
@@ -118,6 +158,7 @@ Dans l'interface, une vélocité est stockée entre 0 et 1 (`S.pat[id][pas]`) ; 
 
 ## Pistes pour la suite
 
+- **Réaliser la refonte de l'interface** décrite plus haut (maquette dans `ui/maquette/`).
 - Tester en conditions réelles dans Live : glisser-déposer du MIDI vers un slot, sauvegarde et rechargement d'un set.
 - Plus de styles (jungle, footwork, electro, amapiano, reggaeton, lo-fi hip-hop).
 - « Breakdown » et « Rendre surprenant », sur le modèle de « Tenter un drop ».
