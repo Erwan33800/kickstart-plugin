@@ -142,7 +142,7 @@ Les pads de la banque 1 jouent ce que ton kit y a mis : dans un 909 Core Kit, le
 
 - **glisse-le** sur un autre pad de la même banque : si le pad est pris, les deux instruments s'échangent ;
 - ou clique le chevron **⌄** d'un pad et choisis l'instrument dans la liste (ça marche d'une banque à l'autre, et ça ajoute l'instrument au kit s'il n'y était pas) ;
-- **Ordre par défaut** remet tout comme ci-dessus.
+- le menu **Preset** (en haut à droite du Rack) applique une disposition toute faite : **Par défaut** (celle ci-dessus) ou **909 Core Kit** (la disposition du Core Kit 909 d'Ableton : kick C1, rim C#1, snare D1, clap D#1, hats F#1 et A#1, toms G#1 à B1, crash C2, ride D2). Le 909 n'a pas de sample pour les congas, le shaker, le tambourin, le cowbell, le snap, le rimshot, la clave, le woodblock ni le hat pédale : ces instruments passent sur des notes sans pad (banque 2) et restent muets, et Kickstart te prévient quand ils font partie de ton kit. Après un réglage à la main, le menu affiche **Perso**.
 
 Les notes de la banque 2 (E2 à A2) ne sonneront que si ton Drum Rack a des pads à ces notes : dans Live, passe à la page suivante des pads du Drum Rack pour les remplir.
 
