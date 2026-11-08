@@ -23,32 +23,32 @@ jobs:
           cmake -B build -G "Visual Studio 17 2022" -A x64 "-DJUCE_WEBVIEW2_PACKAGE_LOCATION=$loc"
 
       - name: Compilation
-        run: cmake --build build --config Release --target Kickstart_VST3 Kickstart_Standalone --parallel
+        run: cmake --build build --config Release --target OpenGroove_VST3 OpenGroove_Standalone --parallel
 
       - name: Paquet
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force out | Out-Null
-          Copy-Item -Recurse build/Kickstart_artefacts/Release/VST3/Kickstart.vst3 out/
-          Copy-Item build/Kickstart_artefacts/Release/Standalone/Kickstart.exe out/
+          Copy-Item -Recurse "build/OpenGroove_artefacts/Release/VST3/Open Groove.vst3" out/
+          Copy-Item "build/OpenGroove_artefacts/Release/Standalone/Open Groove.exe" out/
           Copy-Item README.md out/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Kickstart-Windows
+          name: OpenGroove-Windows
           path: out
 
       - name: Publier sur la branche builds
         if: github.ref == 'refs/heads/main'
         shell: pwsh
         run: |
-          Compress-Archive -Path out/* -DestinationPath "$env:RUNNER_TEMP/Kickstart-Windows.zip" -Force
+          Compress-Archive -Path out/* -DestinationPath "$env:RUNNER_TEMP/OpenGroove-Windows.zip" -Force
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git checkout --orphan builds-tmp
           git rm -rf --cached . | Out-Null
-          Copy-Item "$env:RUNNER_TEMP/Kickstart-Windows.zip" .
-          git add -f Kickstart-Windows.zip
+          Copy-Item "$env:RUNNER_TEMP/OpenGroove-Windows.zip" .
+          git add -f OpenGroove-Windows.zip
           git commit -m "Build Windows ${{ github.sha }}"
           git push -f origin HEAD:refs/heads/builds
 
@@ -59,13 +59,13 @@ jobs:
       - name: Configuration
         run: cmake -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
       - name: Compilation
-        run: cmake --build build --config Release --target Kickstart_VST3 Kickstart_AU -- -quiet
+        run: cmake --build build --config Release --target OpenGroove_VST3 OpenGroove_AU -- -quiet
       - uses: actions/upload-artifact@v4
         with:
-          name: Kickstart-macOS
+          name: OpenGroove-macOS
           path: |
-            build/Kickstart_artefacts/Release/VST3/Kickstart.vst3
-            build/Kickstart_artefacts/Release/AU/Kickstart.component
+            build/OpenGroove_artefacts/Release/VST3/Open Groove.vst3
+            build/OpenGroove_artefacts/Release/AU/Open Groove.component
 
   release:
     # Publie les fichiers prêts à installer sur la page « Releases » du dépôt (version « latest »)
@@ -81,8 +81,8 @@ jobs:
 
       - name: Archives
         run: |
-          cd dl/Kickstart-Windows && zip -qr ../../Kickstart-Windows.zip . && cd ../..
-          cd dl/Kickstart-macOS && zip -qr ../../Kickstart-macOS.zip . && cd ../..
+          cd dl/OpenGroove-Windows && zip -qr ../../OpenGroove-Windows.zip . && cd ../..
+          cd dl/OpenGroove-macOS && zip -qr ../../OpenGroove-macOS.zip . && cd ../..
           ls -la *.zip
 
       - name: Release « latest »
@@ -91,8 +91,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest Kickstart-Windows.zip Kickstart-macOS.zip \
+          gh release create latest OpenGroove-Windows.zip OpenGroove-macOS.zip \
             --target "${{ github.sha }}" \
-            --title "Kickstart (dernière version)" \
-            --notes "Compilé automatiquement depuis le commit ${{ github.sha }}. Télécharge **Kickstart-Windows.zip** (ou **Kickstart-macOS.zip**), puis suis la section Installer du README." \
+            --title "Open Groove (dernière version)" \
+            --notes "Compilé automatiquement depuis le commit ${{ github.sha }}. Télécharge **OpenGroove-Windows.zip** (ou **OpenGroove-macOS.zip**), puis suis la section Installer du README." \
             --latest

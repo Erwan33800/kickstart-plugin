@@ -1,25 +1,25 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-KickstartProcessor::KickstartProcessor()
+OpenGrooveProcessor::OpenGrooveProcessor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true))
 {
     pendingOffs.reserve (256);
 }
 
-bool KickstartProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool OpenGrooveProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     const auto out = layouts.getMainOutputChannelSet();
     return out == juce::AudioChannelSet::stereo() || out == juce::AudioChannelSet::mono();
 }
 
-void KickstartProcessor::prepareToPlay (double newSampleRate, int)
+void OpenGrooveProcessor::prepareToPlay (double newSampleRate, int)
 {
     sampleRate = newSampleRate > 0 ? newSampleRate : 44100.0;
     pendingOffs.clear();
 }
 
-void KickstartProcessor::flushNoteOffs (juce::MidiBuffer& out, int position)
+void OpenGrooveProcessor::flushNoteOffs (juce::MidiBuffer& out, int position)
 {
     for (const auto& off : pendingOffs)
         out.addEvent (juce::MidiMessage::noteOff (1, off.pitch), position);
@@ -27,7 +27,7 @@ void KickstartProcessor::flushNoteOffs (juce::MidiBuffer& out, int position)
     pendingOffs.clear();
 }
 
-void KickstartProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
+void OpenGrooveProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
 {
     juce::ScopedNoDenormals noDenormals;
     buffer.clear();
@@ -152,7 +152,7 @@ void KickstartProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     midi.swapWith (out);
 }
 
-void KickstartProcessor::setPatternText (const juce::String& text)
+void OpenGrooveProcessor::setPatternText (const juce::String& text)
 {
     auto parsed = std::make_shared<Pattern> (Pattern::parse (text));
 
@@ -165,25 +165,25 @@ void KickstartProcessor::setPatternText (const juce::String& text)
     pendingPattern = std::move (parsed);
 }
 
-juce::String KickstartProcessor::getPatternText() const
+juce::String OpenGrooveProcessor::getPatternText() const
 {
     const juce::ScopedLock sl (textLock);
     return patternText;
 }
 
-void KickstartProcessor::setUiState (const juce::String& json)
+void OpenGrooveProcessor::setUiState (const juce::String& json)
 {
     const juce::ScopedLock sl (textLock);
     uiState = json;
 }
 
-juce::String KickstartProcessor::getUiState() const
+juce::String OpenGrooveProcessor::getUiState() const
 {
     const juce::ScopedLock sl (textLock);
     return uiState;
 }
 
-void KickstartProcessor::audition (int pitch, int velocity)
+void OpenGrooveProcessor::audition (int pitch, int velocity)
 {
     const auto scope = auditionFifo.write (1);
 
@@ -191,9 +191,9 @@ void KickstartProcessor::audition (int pitch, int velocity)
         auditionData[(size_t) scope.startIndex1] = { juce::jlimit (0, 127, pitch), juce::jlimit (1, 127, velocity) };
 }
 
-void KickstartProcessor::getStateInformation (juce::MemoryBlock& destData)
+void OpenGrooveProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    juce::ValueTree state ("Kickstart");
+    juce::ValueTree state ("OpenGroove");
     state.setProperty ("version", 1, nullptr);
     state.setProperty ("pattern", getPatternText(), nullptr);
     state.setProperty ("ui", getUiState(), nullptr);
@@ -203,11 +203,11 @@ void KickstartProcessor::getStateInformation (juce::MemoryBlock& destData)
     state.writeToStream (stream);
 }
 
-void KickstartProcessor::setStateInformation (const void* data, int sizeInBytes)
+void OpenGrooveProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     const auto state = juce::ValueTree::readFromData (data, (size_t) sizeInBytes);
 
-    if (! state.hasType ("Kickstart"))
+    if (! state.hasType ("OpenGroove"))
         return;
 
     setUiState (state.getProperty ("ui").toString());
@@ -219,12 +219,12 @@ void KickstartProcessor::setStateInformation (const void* data, int sizeInBytes)
         setPatternText (text);
 }
 
-juce::AudioProcessorEditor* KickstartProcessor::createEditor()
+juce::AudioProcessorEditor* OpenGrooveProcessor::createEditor()
 {
-    return new KickstartEditor (*this);
+    return new OpenGrooveEditor (*this);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new KickstartProcessor();
+    return new OpenGrooveProcessor();
 }
