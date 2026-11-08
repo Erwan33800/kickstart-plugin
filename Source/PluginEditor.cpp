@@ -31,8 +31,8 @@ KickstartEditor::KickstartEditor (KickstartProcessor& p)
     browser.goToURL (juce::WebBrowserComponent::getResourceProviderRoot());
 
     setResizable (true, true);
-    setResizeLimits (980, 180, 1800, 420);
-    setSize (1180, 196);
+    setResizeLimits (1000, 640, 1800, 1000);
+    setSize (1120, 740);
 
     startTimerHz (30);
 }
