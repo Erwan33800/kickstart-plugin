@@ -5,7 +5,7 @@ namespace MidiExport
     juce::String safeFileName (const juce::String& name)
     {
         auto cleaned = name.replaceCharacters ("\\/:*?\"<>|", "---------").trim();
-        return cleaned.isEmpty() ? juce::String ("Kickstart") : cleaned.substring (0, 80);
+        return cleaned.isEmpty() ? juce::String ("Open Groove") : cleaned.substring (0, 80);
     }
 
     bool writeMidiFile (const Pattern& pattern, const juce::String& clipName, const juce::File& target)

@@ -1,12 +1,12 @@
 
 /* ================= interface ================= */
 const $=id=>document.getElementById(id);
-/* Lien avec le plugin JUCE (WebView) : événements "kickstart" dans les deux sens */
+/* Lien avec le plugin JUCE (WebView) : événements "opengroove" dans les deux sens */
 const JUCE=!!(window.__JUCE__&&window.__JUCE__.backend);
 const IN_PLUGIN=JUCE;
 const handlers={};
 function bindIn(n,f){handlers[n]=f}
-if(JUCE)window.__JUCE__.backend.addEventListener('kickstart',a=>{try{const arr=Array.isArray(a)?a:[];handlers[arr[0]]&&handlers[arr[0]](...arr.slice(1))}catch(e){console.error(e)}});
+if(JUCE)window.__JUCE__.backend.addEventListener('opengroove',a=>{try{const arr=Array.isArray(a)?a:[];handlers[arr[0]]&&handlers[arr[0]](...arr.slice(1))}catch(e){console.error(e)}});
 const GENRE_ORDER=['house','techno','afro','dubtechno','dub','garage','breaks','dnb','dubstep'];
 const GENRE_LABEL={house:'House',techno:'Techno',afro:'Afro house',dubtechno:'Dub techno',dub:'Dub',garage:'UK garage',breaks:'Breakbeat',dnb:'Drum & bass',dubstep:'Dubstep'};
 /* Le drop n'est pas un type : il a son bouton (S.base quand il est actif) */
@@ -37,8 +37,8 @@ const ICON={
   lock:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>',
   mute:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6h2.5l3.5-3v10l-3.5-3H2.5z"/><path d="M11 6l4 4M15 6l-4 4"/></svg>',
   chev:'<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5 5 6.5l3-3"/></svg>'};
-const store={get(k,d){try{const v=localStorage.getItem('kickstart.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},
-  set(k,v){try{localStorage.setItem('kickstart.'+k,JSON.stringify(v))}catch(_){}}};
+const store={get(k,d){try{const v=localStorage.getItem('opengroove.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},
+  set(k,v){try{localStorage.setItem('opengroove.'+k,JSON.stringify(v))}catch(_){}}};
 S.map={...DEFAULT_MAP,...store.get('map3',{})};
 S.swingClip=store.get('swingClip',true);
 S.listen=true;
@@ -48,7 +48,7 @@ const curKit=()=>IDS.filter(id=>S.kit.has(id));
 const presetOf=()=>Object.entries(PRESETS).find(([,ids])=>sameSet(ids,curKit()));
 
 /* ---------- échanges avec le plugin ---------- */
-function toMax(...a){if(JUCE)try{window.__JUCE__.backend.emitEvent('kickstart',a)}catch(_){}}
+function toMax(...a){if(JUCE)try{window.__JUCE__.backend.emitEvent('opengroove',a)}catch(_){}}
 /* Pattern sérialisé : "pas_swing_swingClip/pitch.v.v.v/pitch.v.v..." (vélocités 0-127), sans les pistes coupées */
 function patternString(){
   const n=steps(),rows=[];
@@ -59,7 +59,7 @@ let pushT;
 function pushPattern(){clearTimeout(pushT);pushT=setTimeout(()=>toMax('pattern',patternString()),20)}
 const modeKey=h=>h.base?(h.derived==='break'?'break':'drop'):h.mode; // couleur d'accent : type, drop ou breakdown
 const derivedLabel=h=>`${DERIVED_NAME[h.derived||'drop'].toLowerCase()} ${h.dropName.toLowerCase()}`;
-function clipName(){return `Kickstart · ${GENRE_LABEL[S.genre]} ${S.base?derivedLabel(S):MODE_NAME[S.mode].toLowerCase()}`}
+function clipName(){return `Open Groove · ${GENRE_LABEL[S.genre]} ${S.base?derivedLabel(S):MODE_NAME[S.mode].toLowerCase()}`}
 /* Pas d'accès aux clips depuis un VST : on glisse le MIDI vers Live, ou on l'exporte en .mid */
 function writeClip(){
   if(!IN_PLUGIN){showMsg('Hors du plugin : export indisponible.',true);return}

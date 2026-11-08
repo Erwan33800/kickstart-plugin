@@ -1,4 +1,4 @@
-# Assemble ui/kickstart_plugin.html à partir de ui/src/ (en-tête + moteur + interface).
+# Assemble ui/opengroove_ui.html à partir de ui/src/ (en-tête + moteur + interface).
 # La police Manrope (SIL OFL, sous-ensemble latin) est intégrée en base64 : le WebView est hors ligne.
 import base64
 from pathlib import Path
@@ -11,5 +11,5 @@ assert "__MANROPE__" in head, "placeholder __MANROPE__ introuvable dans plugin-h
 head = head.replace("__MANROPE__", font)
 html = head + (src / "engine.js").read_text(encoding="utf-8") \
      + (src / "plugin-ui.js").read_text(encoding="utf-8") + "\n</script>\n</body>\n</html>\n"
-(root / "kickstart_plugin.html").write_text(html, encoding="utf-8")
-print("ui/kickstart_plugin.html :", len(html), "octets")
+(root / "opengroove_ui.html").write_text(html, encoding="utf-8")
+print("ui/opengroove_ui.html :", len(html), "octets")

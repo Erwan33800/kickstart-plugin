@@ -4,7 +4,7 @@
 
 namespace
 {
-    const juce::Identifier eventId { "kickstart" };
+    const juce::Identifier eventId { "opengroove" };
 
     juce::WebBrowserComponent::Options makeOptions()
     {
@@ -12,7 +12,7 @@ namespace
             .withBackend (juce::WebBrowserComponent::Options::Backend::webview2)
             .withWinWebView2Options (juce::WebBrowserComponent::Options::WinWebView2 {}
                                          .withUserDataFolder (juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory)
-                                                                  .getChildFile ("Kickstart")
+                                                                  .getChildFile ("OpenGroove")
                                                                   .getChildFile ("WebView"))
                                          .withBackgroundColour (juce::Colour (0xff141518)))
             .withNativeIntegrationEnabled()
@@ -20,7 +20,7 @@ namespace
     }
 }
 
-KickstartEditor::KickstartEditor (KickstartProcessor& p)
+OpenGrooveEditor::OpenGrooveEditor (OpenGrooveProcessor& p)
     : AudioProcessorEditor (p),
       processor (p),
       browser (makeOptions()
@@ -37,36 +37,36 @@ KickstartEditor::KickstartEditor (KickstartProcessor& p)
     startTimerHz (30);
 }
 
-KickstartEditor::~KickstartEditor()
+OpenGrooveEditor::~OpenGrooveEditor()
 {
     stopTimer();
 }
 
-void KickstartEditor::paint (juce::Graphics& g)
+void OpenGrooveEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colour (0xff141518));
 }
 
-void KickstartEditor::resized()
+void OpenGrooveEditor::resized()
 {
     browser.setBounds (getLocalBounds());
 }
 
-std::optional<juce::WebBrowserComponent::Resource> KickstartEditor::getResource (const juce::String& url)
+std::optional<juce::WebBrowserComponent::Resource> OpenGrooveEditor::getResource (const juce::String& url)
 {
     const auto path = url.fromFirstOccurrenceOf ("/", false, false).upToFirstOccurrenceOf ("?", false, false);
 
     if (path.isEmpty() || path == "index.html")
     {
-        const auto* data = reinterpret_cast<const std::byte*> (BinaryData::kickstart_plugin_html);
-        return juce::WebBrowserComponent::Resource { std::vector<std::byte> (data, data + BinaryData::kickstart_plugin_htmlSize),
+        const auto* data = reinterpret_cast<const std::byte*> (BinaryData::opengroove_ui_html);
+        return juce::WebBrowserComponent::Resource { std::vector<std::byte> (data, data + BinaryData::opengroove_ui_htmlSize),
                                                      "text/html" };
     }
 
     return std::nullopt;
 }
 
-void KickstartEditor::send (std::initializer_list<juce::var> items)
+void OpenGrooveEditor::send (std::initializer_list<juce::var> items)
 {
     juce::Array<juce::var> message;
 
@@ -76,7 +76,7 @@ void KickstartEditor::send (std::initializer_list<juce::var> items)
     browser.emitEventIfBrowserIsVisible (eventId, juce::var (message));
 }
 
-void KickstartEditor::timerCallback()
+void OpenGrooveEditor::timerCallback()
 {
     const int playing = processor.hostPlaying.load() ? 1 : 0;
 
@@ -105,9 +105,9 @@ void KickstartEditor::timerCallback()
     }
 }
 
-juce::File KickstartEditor::writeTempMidi (const juce::String& patternText, const juce::String& clipName)
+juce::File OpenGrooveEditor::writeTempMidi (const juce::String& patternText, const juce::String& clipName)
 {
-    const auto dir = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("Kickstart");
+    const auto dir = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("Open Groove");
     dir.createDirectory();
 
     const auto file = dir.getChildFile (MidiExport::safeFileName (clipName) + ".mid");
@@ -118,7 +118,7 @@ juce::File KickstartEditor::writeTempMidi (const juce::String& patternText, cons
     return {};
 }
 
-void KickstartEditor::handleMessage (const juce::var& message)
+void OpenGrooveEditor::handleMessage (const juce::var& message)
 {
     const auto* args = message.getArray();
 
@@ -166,7 +166,7 @@ void KickstartEditor::handleMessage (const juce::var& message)
         }
 
         juce::DragAndDropContainer::performExternalDragDropOfFiles ({ file.getFullPathName() }, false, this,
-                                                                   [safe = juce::Component::SafePointer<KickstartEditor> (this)]
+                                                                   [safe = juce::Component::SafePointer<OpenGrooveEditor> (this)]
                                                                    {
                                                                        if (safe != nullptr)
                                                                            safe->send ({ "dragdone" });
@@ -174,7 +174,7 @@ void KickstartEditor::handleMessage (const juce::var& message)
     }
     else if (cmd == "export")
     {
-        const auto dir = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("Kickstart MIDI");
+        const auto dir = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory).getChildFile ("Open Groove MIDI");
         dir.createDirectory();
 
         auto file = dir.getNonexistentChildFile (MidiExport::safeFileName (arg (2).toString()), ".mid", true);

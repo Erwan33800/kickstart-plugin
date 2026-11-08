@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Kickstart</title>
+<title>Open Groove</title>
 <style>
 /* Police Manrope (SIL OFL), intégrée en base64 par build_ui.py */
 @font-face{font-family:"Manrope";font-style:normal;font-weight:200 800;font-display:swap;src:url(data:font/woff2;base64,__MANROPE__) format("woff2")}
@@ -28,7 +28,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 
 /* en-tête */
 .top{display:flex;align-items:center;gap:12px;padding:0 14px;min-width:0}
-.logo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.07em;font-size:14px;width:148px;flex:none}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.07em;font-size:14px;width:172px;flex:none}
 .mark{width:26px;height:26px;border-radius:6px;border:1.8px solid var(--hit);display:grid;place-items:center;transition:border-color .25s}
 .mark svg{width:15px;height:15px;stroke:var(--hit);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s}
 .beatbar{flex:1;min-width:0;height:32px;border-radius:8px;border:0;background:var(--panel);display:flex;align-items:center;gap:10px;padding:0 12px;font-size:12px;color:var(--dim);text-align:left}
@@ -216,7 +216,7 @@ button{font:inherit;color:inherit;margin:0;cursor:pointer}
 <body data-mode="classic">
 <div class="win">
   <header class="top">
-    <div class="logo"><span class="mark"><svg viewBox="0 0 16 16"><path d="M2 12.5 6 4l3 6 2-3 3 5.5"/></svg></span>KICKSTART</div>
+    <div class="logo"><span class="mark"><svg viewBox="0 0 16 16"><path d="M2 12.5 6 4l3 6 2-3 3 5.5"/></svg></span>OPEN GROOVE</div>
     <button class="beatbar" id="beatbar" title="Choisir le style et le kit"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="3"/><circle cx="5.7" cy="5.7" r=".6" fill="currentColor"/><circle cx="10.3" cy="10.3" r=".6" fill="currentColor"/><circle cx="8" cy="8" r=".6" fill="currentColor"/></svg><b id="desc"></b><span class="sd" id="seed"></span></button>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="seq" aria-selected="true">Pattern</button>

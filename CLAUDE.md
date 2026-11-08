@@ -1,10 +1,10 @@
-# Kickstart : contexte du projet
+# Open Groove : contexte du projet
 
 Ce fichier résume l'historique et les décisions du projet pour un assistant de code. Il est lu automatiquement par Claude Code à l'ouverture du dépôt.
 
 ## Le projet en une phrase
 
-Kickstart est un plugin VST3 pour Ableton Live qui génère rapidement des patterns de drums « qui s'écoutent », pour démarrer une idée sans perdre de temps sur la batterie. Le but n'est pas le pattern parfait, mais un squelette solide à retoucher.
+Open Groove est un plugin VST3 pour Ableton Live qui génère rapidement des patterns de drums « qui s'écoutent », pour démarrer une idée sans perdre de temps sur la batterie. Le but n'est pas le pattern parfait, mais un squelette solide à retoucher.
 
 ## L'utilisateur
 
@@ -25,7 +25,7 @@ Kickstart est un plugin VST3 pour Ableton Live qui génère rapidement des patte
 - **Édition** : clic ou glisser pour peindre, Maj + clic pour une note fantôme, verrouiller (la piste survit à Générer) ou couper une piste.
 - **Historique** des 5 derniers beats, **annuler** (Z), densité et swing réglables.
 - **Rack** : 2 banques de 16 pads (C1-D#2, E2-G3) pour placer chaque instrument sur le pad de son Drum Rack (glisser, ou chevron ⌄).
-- **Export** : glisser-déposer du MIDI vers Live (bouton « ⇲ Glisser le MIDI »), ou double-clic / touche E pour écrire un `.mid` dans `Documents\Kickstart MIDI`.
+- **Export** : glisser-déposer du MIDI vers Live (bouton « ⇲ Glisser le MIDI »), ou double-clic / touche E pour écrire un `.mid` dans `Documents\Open Groove MIDI`.
 - **Sauvegarde** : pattern, kit, notes et historique sont enregistrés avec le set Live (état du plugin).
 
 Raccourcis : G générer, D drop, B breakdown, Z annuler, 1/2 type, ← → style, E export, Espace lecture (hors plugin seulement).
@@ -39,9 +39,9 @@ Raccourcis : G générer, D drop, B breakdown, Z annuler, 1/2 type, ← → styl
    - Avantage perdu : un device Max se place **devant** le Drum Rack sur la même piste.
 3. **Plugin JUCE (actuel)** : un seul `.vst3`, interface intégrée via WebView2, timing calé sur la tête de lecture de l'hôte, état sauvegardé.
 
-**Contrainte Ableton importante :** Live n'accepte pas les VST « effet MIDI ». Kickstart est donc déclaré **instrument** (`IS_SYNTH TRUE`, sortie audio silencieuse, `NEEDS_MIDI_OUTPUT TRUE`), et une piste MIDI ne contient qu'un instrument. Utilisation obligatoire sur **deux pistes** :
-- piste « Kickstart » avec le plugin ;
-- piste drums avec le Drum Rack, réglée sur **MIDI From = piste Kickstart / Kickstart**, **Monitor = In** ;
+**Contrainte Ableton importante :** Live n'accepte pas les VST « effet MIDI ». Open Groove est donc déclaré **instrument** (`IS_SYNTH TRUE`, sortie audio silencieuse, `NEEDS_MIDI_OUTPUT TRUE`), et une piste MIDI ne contient qu'un instrument. Utilisation obligatoire sur **deux pistes** :
+- piste « Open Groove » avec le plugin ;
+- piste drums avec le Drum Rack, réglée sur **MIDI From = piste Open Groove / Open Groove**, **Monitor = In** ;
 - les deux pistes peuvent être groupées (Ctrl+G), et le montage enregistré comme modèle de set.
 
 Un VST ne peut pas écrire directement dans un clip de Live : d'où le glisser-déposer d'un fichier MIDI.
@@ -50,7 +50,7 @@ Un VST ne peut pas écrire directement dans un clip de Live : d'où le glisser-d
 
 ## Interface (refonte réalisée sur la branche `develop`, nov. 2026)
 
-L'ancienne interface (bande de 1180 x 196 px) était trop dense, austère, avec des fonctions cachées. Une maquette interactive a été validée avec Erwan puis réalisée dans `ui/src/`. La maquette (`ui/maquette/kickstart-maquette.html`) est dans `.gitignore` : elle n'est pas versionnée et n'existe que sur le poste d'Erwan. Son moteur de génération était un simple substitut ; le vrai moteur est `engine.js`.
+L'ancienne interface (bande de 1180 x 196 px) était trop dense, austère, avec des fonctions cachées. Une maquette interactive a été validée avec Erwan puis réalisée dans `ui/src/`. La maquette (`ui/maquette/opengroove-maquette.html`) est dans `.gitignore` : elle n'est pas versionnée et n'existe que sur le poste d'Erwan. Son moteur de génération était un simple substitut ; le vrai moteur est `engine.js`.
 
 Inspiration : le plugin ADSR Drum Machine (look plat, tuiles arrondies, nom d'instrument coloré, un seul accent). Ambiance voulue : instrument hardware.
 
@@ -80,7 +80,7 @@ Inspiration : le plugin ADSR Drum Machine (look plat, tuiles arrondies, nom d'in
 
 La banque 1 (C1-D#2) garde exactement les 16 pads d'avant (les toms y occupent G#1, A1, B1) : les kits Ableton d'Erwan ne bougent pas. Les nouveaux sont dans la banque 2 (E2 à A2) ; ils ne sonnent que si le Drum Rack a des pads à ces notes (page suivante des pads dans Live).
 
-**Versions et état sauvegardé** : `MAP_V=3` (mapping des notes) et `v:2` dans l'état exporté (`exportState`). Un état d'une version antérieure est ignoré au chargement, et l'historique du navigateur est stocké sous de nouvelles clés (`device.recent2`, `kickstart.map3`). Il faut les incrémenter à chaque changement incompatible.
+**Versions et état sauvegardé** : `MAP_V=3` (mapping des notes) et `v:2` dans l'état exporté (`exportState`). Un état d'une version antérieure est ignoré au chargement, et l'historique du navigateur est stocké sous de nouvelles clés (`device.recent2`, `opengroove.map3`). Il faut les incrémenter à chaque changement incompatible.
 
 **Moteur** : règle de conception : **tout instrument du kit doit jouer une vraie partie dans chaque style**, sinon l'utilisateur l'ajoute et n'entend rien (les toms ne jouaient presque jamais avant ça). Dans `extras()`, la fin du bloc donne une partie à chaque instrument selon trois familles de styles (`fam` : four = house/techno/afro/dub techno, half = dub/dubstep, broken = garage/breakbeat/dnb), puis un filet de sécurité `ens()` ajoute une partie à tout instrument de base resté muet (snare en techno, clap en dub, etc.). La présence ne dépend pas de la densité (`c.r()` direct, pas `c.maybe`). Seul le crash reste aléatoire (90 % des boucles). Pour vérifier, mesurer la présence par instrument et par style sur le kit « Tout » (objectif 100 %) ; les toms seuls fusionnent les trois rôles via `FALLBACK`. Le générateur est seedé : ne pas intercaler de tirages avant ceux des instruments ajoutés en fin de `extras()`, ça changerait les motifs existants. Les 6 derniers instruments y sont tirés **après** les autres. Le crash est posé dans `build()` (premier temps de la boucle, une fois sur deux) et dans `applyDrop()`. `tomRoll()` répartit les fills sur aigu, médium, grave.
 
@@ -89,7 +89,7 @@ La banque 1 (C1-D#2) garde exactement les 16 pads d'avant (les toms y occupent G
 - Un espacement (`margin-top`) sur une ligne de séquenceur raccourcit cette ligne : utiliser un élément séparateur (`.gsep`) dans la colonne flex.
 - Les presets doivent être comparés comme des **ensembles** (`sameSet`), pas comme des listes ordonnées.
 
-**Tester sans compiler** : `python ui/build_ui.py`, puis ouvrir `ui/kickstart_plugin.html` dans Chrome (synthé de secours, lecture avec Espace). Le pont avec JUCE (glisser du MIDI, état, auditions) ne se teste que dans le plugin ; il a été vérifié avec un faux `window.__JUCE__` dans Chrome piloté par script, pas dans Live.
+**Tester sans compiler** : `python ui/build_ui.py`, puis ouvrir `ui/opengroove_ui.html` dans Chrome (synthé de secours, lecture avec Espace). Le pont avec JUCE (glisser du MIDI, état, auditions) ne se teste que dans le plugin ; il a été vérifié avec un faux `window.__JUCE__` dans Chrome piloté par script, pas dans Live.
 
 ## Architecture
 
@@ -105,17 +105,17 @@ ui/
   src/engine.js             moteur : TRACKS (22 instruments), GENRE_DEF, recettes R[style][type], extras, mutate, fill, drops, synthé de secours
   src/plugin-ui.js          interface : Rack et banques, séquenceur, bande de réglages, style & kit, historique, lien avec le plugin
   src/manrope-latin.woff2   police Manrope (SIL OFL)
-  build_ui.py               assemble ui/kickstart_plugin.html (head + police + engine + ui)
-  kickstart_plugin.html     page générée, embarquée dans le binaire (juce_add_binary_data)
+  build_ui.py               assemble ui/opengroove_ui.html (head + police + engine + ui)
+  opengroove_ui.html     page générée, embarquée dans le binaire (juce_add_binary_data)
 .github/workflows/build.yml compile Windows (windows-2022, WebView2 via NuGet) et macOS (macos-15),
-                            puis met à jour la release GitHub « latest » (Kickstart-Windows.zip, Kickstart-macOS.zip)
+                            puis met à jour la release GitHub « latest » (OpenGroove-Windows.zip, OpenGroove-macOS.zip)
 ```
 
-**Ne jamais modifier `ui/kickstart_plugin.html` à la main** : modifier `ui/src/*`, puis lancer `python ui/build_ui.py` et commiter les deux.
+**Ne jamais modifier `ui/opengroove_ui.html` à la main** : modifier `ui/src/*`, puis lancer `python ui/build_ui.py` et commiter les deux.
 
 ### Pont interface <-> plugin
 
-Événement JUCE unique `kickstart`, avec un tableau `[commande, ...arguments]`.
+Événement JUCE unique `opengroove`, avec un tableau `[commande, ...arguments]`.
 
 - **Page vers plugin** (`window.__JUCE__.backend.emitEvent`) :
   - `pattern <texte>` : nouveau pattern à jouer
@@ -124,7 +124,7 @@ ui/
   - `state <json>` : état de l'interface à sauvegarder dans le set
   - `ready` : la page est chargée (le plugin renvoie `restore`)
   - `dragmidi <texte> <nomDuClip>` : lancer le glisser-déposer d'un .mid
-  - `export <texte> <nomDuClip>` : écrire un .mid dans `Documents\Kickstart MIDI`
+  - `export <texte> <nomDuClip>` : écrire un .mid dans `Documents\Open Groove MIDI`
 - **Plugin vers page** (`emitEventIfBrowserIsVisible`) : `tempo <bpm>`, `transport 0|1`, `step <n>`, `status ok|err <message>`, `restore <json>`, `dragdone`.
 
 Hors du plugin (fichier ouvert dans un navigateur), la page fonctionne seule avec le synthé Web Audio de secours.
@@ -142,9 +142,9 @@ Dans l'interface, une vélocité est stockée entre 0 et 1 (`S.pat[id][pas]`) ; 
 ## Compiler et publier
 
 - Pousser sur `main` déclenche la CI. En ~5 minutes, la page **Releases > latest** contient les zips prêts à installer. Le dépôt ne contient aucun binaire.
-- Installation Windows : copier `Kickstart.vst3` dans `C:\Program Files\Common Files\VST3`, puis dans Live activer « Utiliser les dossiers système VST3 » et réanalyser. Fermer Live avant de remplacer le plugin.
-- Compilation locale possible : `cmake -B build` puis `cmake --build build --config Release --target Kickstart_VST3`. Sous Windows, il faut Visual Studio 2022 et le SDK WebView2 (voir le workflow pour la commande NuGet et `JUCE_WEBVIEW2_PACKAGE_LOCATION`). Sous Linux, la compilation sert seulement à vérifier le code.
-- Pour tester l'interface sans compiler : ouvrir `ui/kickstart_plugin.html` dans un navigateur.
+- Installation Windows : copier `Open Groove.vst3` dans `C:\Program Files\Common Files\VST3`, puis dans Live activer « Utiliser les dossiers système VST3 » et réanalyser. Fermer Live avant de remplacer le plugin.
+- Compilation locale possible : `cmake -B build` puis `cmake --build build --config Release --target OpenGroove_VST3`. Sous Windows, il faut Visual Studio 2022 et le SDK WebView2 (voir le workflow pour la commande NuGet et `JUCE_WEBVIEW2_PACKAGE_LOCATION`). Sous Linux, la compilation sert seulement à vérifier le code.
+- Pour tester l'interface sans compiler : ouvrir `ui/opengroove_ui.html` dans un navigateur.
 
 ## Conventions
 

@@ -1,4 +1,4 @@
-# Kickstart
+# Open Groove
 
 Générateur de patterns de drums pour Ableton Live (et tout logiciel qui accepte les VST3).
 En un clic, tu obtiens un squelette de batterie qui s'écoute, puis tu le peaufines.
@@ -20,17 +20,17 @@ En un clic, tu obtiens un squelette de batterie qui s'écoute, puis tu le peaufi
 Le dépôt ne contient que le code source. Le plugin prêt à installer est fabriqué automatiquement par GitHub à chaque modification et publié sur la page **Releases**.
 
 1. Ouvre la page **[Releases](../../releases/latest)** du dépôt (colonne de droite sur la page d'accueil du dépôt, rubrique *Releases*).
-2. Dans **Assets**, télécharge **`Kickstart-Windows.zip`** (ou `Kickstart-macOS.zip` sur Mac).
+2. Dans **Assets**, télécharge **`OpenGroove-Windows.zip`** (ou `OpenGroove-macOS.zip` sur Mac).
 3. Fais un clic droit sur le zip, puis **Extraire tout**. Tu obtiens :
-   - `Kickstart.vst3` : **le plugin** (c'est un dossier, c'est normal) ;
-   - `Kickstart.exe` : une version autonome, pour essayer l'interface sans Live ;
+   - `Open Groove.vst3` : **le plugin** (c'est un dossier, c'est normal) ;
+   - `Open Groove.exe` : une version autonome, pour essayer l'interface sans Live ;
    - `README.md` : ce fichier.
 
 > Si la page Releases est vide, la première compilation n'est pas terminée : regarde l'onglet **Actions** (environ 10 minutes).
 
 ## 2. Installer (Windows)
 
-1. Copie le dossier **`Kickstart.vst3`** dans :
+1. Copie le dossier **`Open Groove.vst3`** dans :
    ```
    C:\Program Files\Common Files\VST3
    ```
@@ -38,38 +38,38 @@ Le dépôt ne contient que le code source. Le plugin prêt à installer est fabr
 2. Dans Live : **Options > Préférences > Plug-ins**.
    - Active **Utiliser les dossiers système VST3** (*Use VST3 Plug-in System Folders*).
    - Clique **Réanalyser** (*Rescan*).
-3. Kickstart apparaît dans le navigateur de Live : **Plug-ins > VST3 > Erwan > Kickstart**.
+3. Open Groove apparaît dans le navigateur de Live : **Plug-ins > VST3 > Erwan > Open Groove**.
 
-**Mettre à jour :** télécharge la nouvelle release, ferme Live, remplace le dossier `Kickstart.vst3`, rouvre Live.
+**Mettre à jour :** télécharge la nouvelle release, ferme Live, remplace le dossier `Open Groove.vst3`, rouvre Live.
 
 ### Sur Mac
 
-Copie `Kickstart.vst3` dans `~/Library/Audio/Plug-Ins/VST3` (et `Kickstart.component` dans `~/Library/Audio/Plug-Ins/Components` pour l'AU), puis réanalyse dans Live. Le plugin n'est pas signé : au premier lancement, autorise-le dans *Réglages Système > Confidentialité et sécurité*.
+Copie `Open Groove.vst3` dans `~/Library/Audio/Plug-Ins/VST3` (et `Open Groove.component` dans `~/Library/Audio/Plug-Ins/Components` pour l'AU), puis réanalyse dans Live. Le plugin n'est pas signé : au premier lancement, autorise-le dans *Réglages Système > Confidentialité et sécurité*.
 
-## 3. Brancher Kickstart sur ta batterie dans Live
+## 3. Brancher Open Groove sur ta batterie dans Live
 
-Dans Live, une piste MIDI ne peut contenir qu'**un seul instrument**. Kickstart et ton Drum Rack vivent donc sur **deux pistes** : Kickstart génère les notes, la piste drums les écoute et joue ses propres samples.
+Dans Live, une piste MIDI ne peut contenir qu'**un seul instrument**. Open Groove et ton Drum Rack vivent donc sur **deux pistes** : Open Groove génère les notes, la piste drums les écoute et joue ses propres samples.
 
 ```
-┌───────────────────────┐        ┌──────────────────────────────┐
-│ Piste « Kickstart »   │  MIDI  │ Piste « Drums »              │
-│  Kickstart (VST3)     │ ─────▶ │  MIDI From : Kickstart       │
-│  (ne fait aucun son)  │        │  Monitor : In                │
-└───────────────────────┘        │  Drum Rack (tes samples)     │
-                                 └──────────────────────────────┘
+┌─────────────────────────┐        ┌──────────────────────────────┐
+│ Piste « Open Groove »   │  MIDI  │ Piste « Drums »              │
+│  Open Groove (VST3)     │ ─────▶ │  MIDI From : Open Groove     │
+│  (ne fait aucun son)    │        │  Monitor : In                │
+└─────────────────────────┘        │  Drum Rack (tes samples)     │
+                                   └──────────────────────────────┘
 ```
 
 ### Étape par étape
 
 1. **Ta piste drums** : garde-la telle quelle, avec ton Drum Rack (par exemple *909 Core Kit*).
-2. **Crée une piste MIDI vide** : *Créer > Insérer une piste MIDI* (Ctrl+Maj+T). Renomme-la « Kickstart » (Ctrl+R).
-3. **Charge Kickstart** dessus en le glissant depuis *Plug-ins > VST3*. Tu n'as rien à régler sur cette piste.
+2. **Crée une piste MIDI vide** : *Créer > Insérer une piste MIDI* (Ctrl+Maj+T). Renomme-la « Open Groove » (Ctrl+R).
+3. **Charge Open Groove** dessus en le glissant depuis *Plug-ins > VST3*. Tu n'as rien à régler sur cette piste.
 4. **Sur la piste drums**, dans la section *Entrée/Sortie* du mixeur (si elle est cachée, active-la avec le petit bouton **I/O** en bas à droite de la vue Session, ou *Affichage > Entrée/Sortie*) :
 
    | Réglage | Valeur |
    |---|---|
-   | **MIDI From** (1er menu) | la piste **Kickstart** |
-   | 2e menu | **Kickstart** (pas « Post FX ») |
+   | **MIDI From** (1er menu) | la piste **Open Groove** |
+   | 2e menu | **Open Groove** (pas « Post FX ») |
    | **Monitor** | **In** |
    | **Sortie audio** | comme tes autres pistes (Master ou ton groupe) |
 
@@ -79,19 +79,19 @@ Dans Live, une piste MIDI ne peut contenir qu'**un seul instrument**. Kickstart 
 
 Pour les garder ensemble et les replier d'un clic :
 
-1. Clique sur le titre de la piste **Kickstart**, puis **Ctrl+clic** sur le titre de la piste **drums** pour sélectionner les deux.
+1. Clique sur le titre de la piste **Open Groove**, puis **Ctrl+clic** sur le titre de la piste **drums** pour sélectionner les deux.
 2. **Ctrl+G** (*Grouper les pistes*). Renomme le groupe, par exemple « DRUMS ».
 3. Le routage continue de fonctionner à l'intérieur du groupe : rien à refaire.
 
 ### Ne plus jamais refaire le branchement
 
-Une fois les deux pistes prêtes dans un set vide : **Fichier > Enregistrer le set Live en tant que modèle**. Chaque nouveau projet démarrera avec Kickstart déjà branché sur ta batterie.
+Une fois les deux pistes prêtes dans un set vide : **Fichier > Enregistrer le set Live en tant que modèle**. Chaque nouveau projet démarrera avec Open Groove déjà branché sur ta batterie.
 
 ### Plusieurs batteries ?
 
-Chaque piste drums peut écouter son propre Kickstart. Tu peux aussi brancher plusieurs pistes drums sur le même Kickstart : elles joueront le même pattern.
+Chaque piste drums peut écouter son propre Open Groove. Tu peux aussi brancher plusieurs pistes drums sur le même Open Groove : elles joueront le même pattern.
 
-## 4. Utiliser Kickstart
+## 4. Utiliser Open Groove
 
 La fenêtre a deux onglets : **Pattern** (le Rack, les réglages et le séquenceur) et **Style & kit**.
 
@@ -105,9 +105,9 @@ La fenêtre a deux onglets : **Pattern** (le Rack, les réglages et le séquence
 ### Poser le pattern dans un clip
 
 - **Maintiens « ⇲ Glisser le MIDI »** et lâche-le sur la piste drums (ou dans un slot) : Live crée le clip.
-- En secours : **double-clic** sur ce bouton (ou touche **E**) exporte un fichier `.mid` dans `Documents\Kickstart MIDI`, à glisser ensuite dans Live.
+- En secours : **double-clic** sur ce bouton (ou touche **E**) exporte un fichier `.mid` dans `Documents\Open Groove MIDI`, à glisser ensuite dans Live.
 
-Une fois le pattern figé dans un clip, remets le **Monitor** de la piste drums sur **Auto** pour n'entendre que le clip (sinon Kickstart et le clip jouent en même temps).
+Une fois le pattern figé dans un clip, remets le **Monitor** de la piste drums sur **Auto** pour n'entendre que le clip (sinon Open Groove et le clip jouent en même temps).
 
 ### Raccourcis
 
@@ -142,7 +142,7 @@ Les pads de la banque 1 jouent ce que ton kit y a mis : dans un 909 Core Kit, le
 
 - **glisse-le** sur un autre pad de la même banque : si le pad est pris, les deux instruments s'échangent ;
 - ou clique le chevron **⌄** d'un pad et choisis l'instrument dans la liste (ça marche d'une banque à l'autre, et ça ajoute l'instrument au kit s'il n'y était pas) ;
-- le menu **Preset** (en haut à droite du Rack) applique une disposition toute faite : **Par défaut** (celle ci-dessus) ou **909 Core Kit** (la disposition du Core Kit 909 d'Ableton : kick C1, rim C#1, snare D1, clap D#1, hats F#1 et A#1, toms G#1 à B1, crash C2, ride D2). Le 909 n'a pas de sample pour les congas, le shaker, le tambourin, le cowbell, le snap, le rimshot, la clave, le woodblock ni le hat pédale : ces instruments passent sur des notes sans pad (banque 2) et restent muets, et Kickstart te prévient quand ils font partie de ton kit. Après un réglage à la main, le menu affiche **Perso**.
+- le menu **Preset** (en haut à droite du Rack) applique une disposition toute faite : **Par défaut** (celle ci-dessus) ou **909 Core Kit** (la disposition du Core Kit 909 d'Ableton : kick C1, rim C#1, snare D1, clap D#1, hats F#1 et A#1, toms G#1 à B1, crash C2, ride D2). Le 909 n'a pas de sample pour les congas, le shaker, le tambourin, le cowbell, le snap, le rimshot, la clave, le woodblock ni le hat pédale : ces instruments passent sur des notes sans pad (banque 2) et restent muets, et Open Groove te prévient quand ils font partie de ton kit. Après un réglage à la main, le menu affiche **Perso**.
 
 Les notes de la banque 2 (E2 à A2) ne sonneront que si ton Drum Rack a des pads à ces notes : dans Live, passe à la page suivante des pads du Drum Rack pour les remplir.
 
@@ -150,20 +150,20 @@ Les notes de la banque 2 (E2 à A2) ne sonneront que si ton Drum Rack a des pads
 
 | Problème | Solution |
 |---|---|
-| Kickstart n'apparaît pas dans Live | Vérifie que le dossier est bien `C:\Program Files\Common Files\VST3\Kickstart.vst3`, que *Utiliser les dossiers système VST3* est activé, puis **Réanalyser**. |
-| Charger Kickstart remplace mon Drum Rack | Normal : un seul instrument par piste. Mets Kickstart sur **sa propre piste** (section 3). |
-| Pas de son | Sur la piste drums : **Monitor sur In** (pas Auto), **MIDI From** sur Kickstart, et la lecture de Live doit être lancée. |
+| Open Groove n'apparaît pas dans Live | Vérifie que le dossier est bien `C:\Program Files\Common Files\VST3\Open Groove.vst3`, que *Utiliser les dossiers système VST3* est activé, puis **Réanalyser**. |
+| Charger Open Groove remplace mon Drum Rack | Normal : un seul instrument par piste. Mets Open Groove sur **sa propre piste** (section 3). |
+| Pas de son | Sur la piste drums : **Monitor sur In** (pas Auto), **MIDI From** sur Open Groove, et la lecture de Live doit être lancée. |
 | Je n'entends qu'une partie du kit, ou un élément joue le mauvais son | Ouvre le **Rack** (onglet Pattern) et place chaque instrument sur le pad de ton Drum Rack qui porte le bon son. Les instruments de la banque 2 (crash, rimshot, snap, clave, woodblock, hat pédale) demandent des pads aux notes E2 à A2. |
 | La fenêtre du plugin reste blanche | Installe ou mets à jour *Microsoft Edge WebView2 Runtime* (déjà présent sur la plupart des Windows 10/11). |
-| Le glisser-déposer ne crée pas de clip | Utilise l'export `.mid` (double-clic ou touche E), puis glisse le fichier depuis `Documents\Kickstart MIDI`. |
+| Le glisser-déposer ne crée pas de clip | Utilise l'export `.mid` (double-clic ou touche E), puis glisse le fichier depuis `Documents\Open Groove MIDI`. |
 
 ---
 
 ## Développement
 
 - `Source/` : processeur JUCE (lecture MIDI calée sur l'hôte, sauvegarde de l'état), fenêtre WebView2, export MIDI.
-- `ui/src/` : interface (HTML, moteur de génération, liaison avec le plugin, police Manrope). `python3 ui/build_ui.py` assemble `ui/kickstart_plugin.html`, embarqué dans le plugin.
-- Compilation locale : `cmake -B build` puis `cmake --build build --config Release --target Kickstart_VST3`. Sous Windows, le SDK WebView2 s'installe via NuGet (voir `.github/workflows/build.yml`).
+- `ui/src/` : interface (HTML, moteur de génération, liaison avec le plugin, police Manrope). `python3 ui/build_ui.py` assemble `ui/opengroove_ui.html`, embarqué dans le plugin.
+- Compilation locale : `cmake -B build` puis `cmake --build build --config Release --target OpenGroove_VST3`. Sous Windows, le SDK WebView2 s'installe via NuGet (voir `.github/workflows/build.yml`).
 - Chaque push sur `main` compile Windows et macOS (GitHub Actions) et met à jour la release **latest**.
 
 JUCE 8 (formule Starter / AGPLv3), SDK VST3 (licence MIT) et police Manrope (SIL Open Font License).

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(Kickstart VERSION 0.1.0 LANGUAGES C CXX)
+project(OpenGroove VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,18 +13,18 @@ FetchContent_Declare(
     GIT_SHALLOW    TRUE)
 FetchContent_MakeAvailable(juce)
 
-set(KICKSTART_FORMATS VST3 Standalone)
+set(OPENGROOVE_FORMATS VST3 Standalone)
 if(APPLE)
-    list(APPEND KICKSTART_FORMATS AU)
+    list(APPEND OPENGROOVE_FORMATS AU)
 endif()
 
-juce_add_plugin(Kickstart
+juce_add_plugin(OpenGroove
     COMPANY_NAME                 "Erwan"
-    PRODUCT_NAME                 "Kickstart"
-    BUNDLE_ID                    "fr.erwan.kickstart"
+    PRODUCT_NAME                 "Open Groove"
+    BUNDLE_ID                    "fr.erwan.opengroove"
     PLUGIN_MANUFACTURER_CODE     Ewan
-    PLUGIN_CODE                  Ksrt
-    FORMATS                      ${KICKSTART_FORMATS}
+    PLUGIN_CODE                  OpnG
+    FORMATS                      ${OPENGROOVE_FORMATS}
     IS_SYNTH                     TRUE
     NEEDS_MIDI_INPUT             TRUE
     NEEDS_MIDI_OUTPUT            TRUE
@@ -34,14 +34,14 @@ juce_add_plugin(Kickstart
     COPY_PLUGIN_AFTER_BUILD      FALSE
     VST3_CATEGORIES              Instrument Generator Drum)
 
-juce_add_binary_data(KickstartUI SOURCES ui/kickstart_plugin.html)
+juce_add_binary_data(OpenGrooveUI SOURCES ui/opengroove_ui.html)
 
-target_sources(Kickstart PRIVATE
+target_sources(OpenGroove PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
     Source/MidiExport.cpp)
 
-target_compile_definitions(Kickstart PUBLIC
+target_compile_definitions(OpenGroove PUBLIC
     JUCE_WEB_BROWSER=1
     JUCE_USE_CURL=0
     JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1
@@ -50,12 +50,12 @@ target_compile_definitions(Kickstart PUBLIC
 
 if(UNIX AND NOT APPLE)
     # build Linux : utile pour vérifier la compilation, la cible réelle est Windows/macOS
-    target_link_libraries(Kickstart PRIVATE juce::pkgconfig_JUCE_BROWSER_LINUX_DEPS)
+    target_link_libraries(OpenGroove PRIVATE juce::pkgconfig_JUCE_BROWSER_LINUX_DEPS)
 endif()
 
-target_link_libraries(Kickstart
+target_link_libraries(OpenGroove
     PRIVATE
-        KickstartUI
+        OpenGrooveUI
         juce::juce_audio_utils
         juce::juce_gui_extra
     PUBLIC
