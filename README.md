@@ -9,6 +9,8 @@ En un clic, tu obtiens un squelette de batterie qui s'écoute, puis tu le peaufi
 - 22 instruments à composer en kit : kick, snare, clap, snap, rim, rimshot, hats (fermé, pédale, ouvert), ride, crash, cowbell, shaker, tambourin, clave, woodblock, congas, toms (aigu, médium, grave)
 - Un **Rack** de 2 banques de 16 pads pour placer chaque instrument sur le pad de ton Drum Rack
 - « Tenter un drop » : garde ton pattern et le pousse en version drop
+- « Breakdown » : garde ton pattern et le dépouille (plus de kick ni de backbeat), avec un retour en fin de boucle
+- **Dynamique** : accents sur les temps et variations de vélocité propres à chaque instrument, pour des patterns moins mécaniques
 - Historique des 5 derniers beats, sauvegarde avec le set Live
 
 ---
@@ -94,10 +96,11 @@ Chaque piste drums peut écouter son propre Kickstart. Tu peux aussi brancher pl
 La fenêtre a deux onglets : **Pattern** (le Rack, les réglages et le séquenceur) et **Style & kit**.
 
 1. Dans **Style & kit**, choisis un **style** (un clic génère un beat) et un **kit** : un kit prêt à l'emploi, ou les instruments un par un.
-2. Dans **Pattern**, règle le **type** (Classique ou Surprenant), la **longueur** (liste déroulante), le **swing** et la **densité** (glisse sur la valeur, molette, double-clic pour revenir à la valeur du style).
+2. Dans **Pattern**, règle le **type** (Classique ou Surprenant), la **longueur** (liste déroulante), le **swing**, la **densité** et la **dynamique** (glisse sur la valeur, molette, double-clic pour revenir à la valeur par défaut). La densité et la dynamique régénèrent le beat quand tu relâches.
 3. **Générer** (touche G) jusqu'à trouver un groove qui te plaît.
-4. Ajuste : clique ou glisse sur les cases, **Maj + clic** pour une note fantôme, cadenas pour verrouiller une piste (elle survit à Générer), haut-parleur pour la couper.
-5. **Tenter un drop** (touche D) : même structure, version drop, avec un crash sur le premier temps. Appuie encore pour une autre variante, ou clique « revenir à l'original ».
+4. Ajuste : clique ou glisse sur les cases, **Maj + clic** pour une note fantôme, **molette sur une note allumée** pour régler sa vélocité (plus la case est claire, plus elle est forte), cadenas pour verrouiller une piste (elle survit à Générer), haut-parleur pour la couper.
+5. **Tenter un drop** (touche D) : même structure, version drop, avec un crash sur le premier temps. Appuie encore pour une autre variante.
+6. **Breakdown** (touche B) : même structure, version dépouillée, en trois saveurs (Dépouillé, Percussif, Respiration). Le drop et le breakdown partent toujours de ton pattern d'origine : tu peux passer de l'un à l'autre. Clique « revenir à l'original » pour retrouver ton pattern.
 
 ### Poser le pattern dans un clip
 
@@ -112,6 +115,7 @@ Une fois le pattern figé dans un clip, remets le **Monitor** de la piste drums 
 |---|---|
 | G | Générer |
 | D | Tenter un drop |
+| B | Breakdown |
 | Z | Annuler |
 | 1 / 2 | Classique / Surprenant |
 | ← / → | Style précédent / suivant |
